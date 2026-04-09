@@ -1,520 +1,737 @@
 ticker,company_name,cik,source,distress_label,distress_event_date,distress_event_type
-AGCC,Agencia Comercial Spirits Ltd.,0002060016,bankruptcy,1,2024-11-18,chapter_11
-BBBY,"BED BATH & BEYOND, INC.",0001130713,bankruptcy,1,2023-04-23,chapter_11
-BGPIQ,,0000940510,bankruptcy,1,2011-02-16,chapter_11
-BTU,PEABODY ENERGY CORP,0001064728,bankruptcy,1,2016-04-13,chapter_11
-C,CITIGROUP INC,0000831001,bankruptcy,1,2009-11-01,chapter_11
-CLBT,Cellebrite DI Ltd.,0001854587,bankruptcy,1,2023-10-15,chapter_11
-CPK,CHESAPEAKE UTILITIES CORP,0000019745,bankruptcy,1,2020-06-28,chapter_11
-CZR,"Caesars Entertainment, Inc.",0001590895,bankruptcy,1,2015-01-15,chapter_11
-EXPD,EXPEDITORS INTERNATIONAL OF WASHINGTON INC,0000746515,bankruptcy,1,2008-09-26,chapter_11
-FIX,COMFORT SYSTEMS USA INC,0001035983,bankruptcy,1,2011-10-31,chapter_11
-GM,General Motors Co,0001467858,bankruptcy,1,2009-06-01,chapter_11
-HTZ,"HERTZ GLOBAL HOLDINGS, INC",0001657853,bankruptcy,1,2020-05-22,chapter_11
-JBK,LEHMAN ABS CORP GOLDMAN SACHS CAP 1 SEC BACKED SER 2004-6,0001284143,bankruptcy,1,2008-09-15,chapter_11
-JPM,JPMORGAN CHASE & CO,0000019617,bankruptcy,1,2020-05-15,chapter_11
-KODK,EASTMAN KODAK CO,0000031235,bankruptcy,1,2012-01-19,chapter_11
-NMG,Nouveau Monde Graphite Inc.,0001649752,bankruptcy,1,2020-05-07,chapter_11
-PCG,PG&E Corp,0001004980,bankruptcy,1,2019-01-29,chapter_11
-PRTY,,0001592058,bankruptcy,1,2023-01-17,chapter_11
-REV,,0000890547,bankruptcy,1,2022-06-15,chapter_11
-RSHCQ,RADIOSHACK CORP,0000096289,bankruptcy,1,2015-02-05,chapter_11
-SHLDQ,,0001310067,bankruptcy,1,2018-10-15,chapter_11
-SLAB,SILICON LABORATORIES INC.,0001038074,bankruptcy,1,2023-03-17,chapter_11
-SUNEQ,,0001620702,bankruptcy,1,2016-04-21,chapter_11
-TOYS,,0000051734,bankruptcy,1,2017-09-18,chapter_11
-ULCC,"Frontier Group Holdings, Inc.",0001670076,bankruptcy,1,2020-04-14,chapter_11
-A,Agilent Technologies,0001090872,sp500,0,,
-AAPL,Apple Inc.,0000320193,sp500,0,,
+,"21st Century Oncology Holdings, Inc.",0001503518,lopucki_brd,1,5/25/2017,chapter_11
+,"A123 Systems, Inc.",0001167178,lopucki_brd,1,10/16/2012,chapter_11
+,"AMCORE Financial, Inc.",0000714756,lopucki_brd,1,8/19/2010,chapter_11
+,AMR Corporation,0000006201,lopucki_brd,1,11/29/2011,chapter_11
+,ATP Oil & Gas Corporation,0001123647,lopucki_brd,1,8/17/2012,chapter_11
+,Aceto Corporation,0000002034,lopucki_brd,1,2/19/2019,chapter_11
+,Adeptus Health Inc.,0001602367,lopucki_brd,1,4/19/2017,chapter_11
+,"Ahern Rentals, Inc.",0001337913,lopucki_brd,1,12/22/2011,chapter_11
+,"Akorn, Inc.",0000003116,lopucki_brd,1,5/20/2020,chapter_11
+,Allied Nevada Gold Corp.,0001376610,lopucki_brd,1,3/10/2015,chapter_11
+,"Alpha Natural Resources, Inc.",0001301063,lopucki_brd,1,8/3/2015,chapter_11
+,"Alta Mesa Resources, Inc. (Alta Mesa Holdings, LP)",0001690769,lopucki_brd,1,9/11/2019,chapter_11
+,"Ambac Financial Group, Inc.",0000874501,lopucki_brd,1,11/8/2010,chapter_11
+,"American Media Operations, Inc.",0000853927,lopucki_brd,1,11/17/2010,chapter_11
+,American Mortgage Acceptance Company,0000878774,lopucki_brd,1,4/26/2010,chapter_11
+,AmericanWest Bancorporation,0000726990,lopucki_brd,1,10/28/2010,chapter_11
+,Ampal-American Israel Corporation,0000731859,lopucki_brd,1,8/29/2012,chapter_11
+,Anchor BanCorp Wisconsin Inc.,0000885322,lopucki_brd,1,8/12/2013,chapter_11
+,Approach Resources Inc.,0001405073,lopucki_brd,1,11/18/2019,chapter_11
+,"Arch Coal, Inc.",0001037676,lopucki_brd,1,1/11/2016,chapter_11
+,"Armstrong Flooring, Inc.",0001655075,lopucki_brd,1,5/8/2022,chapter_11
+,"Ascena Retail Group, Inc.",0001498301,lopucki_brd,1,7/23/2020,chapter_11
+,Aspect Software Parent Inc.,0001506545,lopucki_brd,1,3/9/2016,chapter_11
+,"Atlas Resource Partners, L.P.",0001532750,lopucki_brd,1,7/27/2016,chapter_11
+,Avaya Inc.,0001116521,lopucki_brd,1,1/19/2017,chapter_11
+,"Azure Midstream Partners, LP",0001575599,lopucki_brd,1,1/30/2017,chapter_11
+,"Basic Energy Services, Inc. (2016)",0001109189,lopucki_brd,1,10/25/2016,chapter_11
+,"Black Elk Energy Offshore Operations, LLC",0001518909,lopucki_brd,1,8/11/2015,chapter_11
+,Blockbuster Inc.,0001085734,lopucki_brd,1,9/23/2010,chapter_11
+,"Bon Ton Stores, Inc.",0000878079,lopucki_brd,1,2/4/2018,chapter_11
+,"Bonanza Creek Energy, Inc.",0001509589,lopucki_brd,1,1/4/2017,chapter_11
+,"Borders Group, Inc.",0000940510,lopucki_brd,1,2/16/2011,chapter_11
+,Breitburn Energy Partners LP,0001357371,lopucki_brd,1,5/15/2016,chapter_11
+,Briggs & Stratton Corporation,0000014195,lopucki_brd,1,7/20/2020,chapter_11
+,Bristow Group Inc.,0000073887,lopucki_brd,1,5/11/2019,chapter_11
+,C&J Energy Services Ltd.,0001615817,lopucki_brd,1,7/20/2016,chapter_11
+,CBL & Associates Properties Inc. (CBL & Associates LP),0000910612,lopucki_brd,1,11/1/2020,chapter_11
+,"CEC Entertainment, Inc.",0000813920,lopucki_brd,1,6/24/2020,chapter_11
+,CHC Group Ltd.,0001586300,lopucki_brd,1,5/5/2016,chapter_11
+,"Caesars Entertainment Operating Company, Inc.",0000858395,lopucki_brd,1,1/12/2015,chapter_11
+,"Cal Dive International, Inc.",0001364100,lopucki_brd,1,3/3/2015,chapter_11
+,California Resources Corporation,0001609253,lopucki_brd,1,7/15/2020,chapter_11
+,Capitol Bancorp Ltd.,0000840264,lopucki_brd,1,8/9/2012,chapter_11
+,Central European Distribution Corporation,0001046880,lopucki_brd,1,4/7/2013,chapter_11
+,Centric Brands Inc.,0000844143,lopucki_brd,1,5/18/2020,chapter_11
+,"Cenveo, Inc.",0000920321,lopucki_brd,1,2/2/2018,chapter_11
+,"Chaparral Energy, Inc. (2020)",0001346980,lopucki_brd,1,8/16/2020,chapter_11
+,Chesapeake Energy Corporation,0000895126,lopucki_brd,1,6/28/2020,chapter_11
+,"Ciber, Inc.",0000918581,lopucki_brd,1,4/9/2017,chapter_11
+,"Claires Stores, Inc.",0000034115,lopucki_brd,1,3/19/2018,chapter_11
+,Cloud Peak Energy Inc.,0001441849,lopucki_brd,1,5/10/2019,chapter_11
+,"Cobalt International Energy, Inc.",0001471261,lopucki_brd,1,12/14/2017,chapter_11
+,"Corinthian Colleges, Inc.",0001066134,lopucki_brd,1,5/4/2015,chapter_11
+,"Corus Bankshares, Inc.",0000051939,lopucki_brd,1,6/15/2010,chapter_11
+,Covia Holdings Corporation,0001722287,lopucki_brd,1,6/29/2020,chapter_11
+,Cumulus Media Inc.,0001058623,lopucki_brd,1,11/29/2017,chapter_11
+,Dean Foods Company,0000931336,lopucki_brd,1,11/12/2019,chapter_11
+,Delta Petroleum Corporation,0000821483,lopucki_brd,1,12/15/2011,chapter_11
+,Denbury Resources Inc.,0000945764,lopucki_brd,1,7/30/2020,chapter_11
+,"Dex Media, Inc. (2016)",0001556739,lopucki_brd,1,5/16/2016,chapter_11
+,Dex One Corporation (2013),0000030419,lopucki_brd,1,3/18/2013,chapter_11
+,"Diamond Offshore Drilling, Inc.",0000949039,lopucki_brd,1,4/26/2020,chapter_11
+,Ditech Holding Corporation (2019),0001040719,lopucki_brd,1,2/11/2019,chapter_11
+,Doral Financial Corporation,0000840889,lopucki_brd,1,3/11/2015,chapter_11
+,"Dynegy Holdings, LLC",0001105055,lopucki_brd,1,11/7/2011,chapter_11
+,EP Energy Corporation (EP Energy LLC),0001584952,lopucki_brd,1,10/3/2019,chapter_11
+,"EV Energy Partners, L.P.",0001361937,lopucki_brd,1,4/2/2018,chapter_11
+,"EXCO Resources, Inc.",0000316300,lopucki_brd,1,1/15/2018,chapter_11
+,Eagle Bulk Shipping Inc.,0001322439,lopucki_brd,1,8/6/2014,chapter_11
+,Eastman Kodak Company,0000031235,lopucki_brd,1,1/19/2012,chapter_11
+,Edison Mission Energy,0000930835,lopucki_brd,1,12/17/2012,chapter_11
+,"Emerald Oil, Inc.",0001283843,lopucki_brd,1,3/22/2016,chapter_11
+,Endeavour International Corporation,0001112412,lopucki_brd,1,10/10/2014,chapter_11
+,Endo International plc,0001593034,lopucki_brd,1,8/16/2022,chapter_11
+,Energy Future Holdings Corp.,0001023291,lopucki_brd,1,4/29/2014,chapter_11
+,Energy XXI Ltd,0001343719,lopucki_brd,1,4/14/2016,chapter_11
+,Erickson Incorporated,0001490165,lopucki_brd,1,11/8/2016,chapter_11
+,Exide Technologies (2013),0000813781,lopucki_brd,1,6/10/2013,chapter_11
+,"Extraction Oil & Gas, Inc.",0001655020,lopucki_brd,1,6/14/2020,chapter_11
+,"FTS International, Inc.",0001529463,lopucki_brd,1,9/22/2020,chapter_11
+,"Ferrellgas Partners, L.P. (Ferrellgas Partners Finance Corp.)",0000922358,lopucki_brd,1,1/11/2021,chapter_11
+,FiberTower Corporation,0001010286,lopucki_brd,1,7/17/2012,chapter_11
+,First Mariner Bancorp,0000946090,lopucki_brd,1,2/10/2014,chapter_11
+,First NBC Bank Holding Company,0001496631,lopucki_brd,1,5/11/2017,chapter_11
+,First Place Financial Corp.,0001068912,lopucki_brd,1,10/29/2012,chapter_11
+,FirstEnergy Solutions Corp.,0001407703,lopucki_brd,1,3/31/2018,chapter_11
+,FirstFed Financial Corp.,0000810536,lopucki_brd,1,1/6/2010,chapter_11
+,Foresight Energy LP,0001540729,lopucki_brd,1,3/10/2020,chapter_11
+,Frontier Communications Corporation,0000020520,lopucki_brd,1,4/14/2020,chapter_11
+,"Furniture Brands International, Inc. (2013)",0000050957,lopucki_brd,1,9/9/2013,chapter_11
+,GMX Resources Inc.,0001127342,lopucki_brd,1,4/1/2013,chapter_11
+,"GNC Holdings, Inc.",0001502034,lopucki_brd,1,6/23/2020,chapter_11
+,GT Advanced Technologies Inc.,0001394954,lopucki_brd,1,10/6/2014,chapter_11
+,"GTT Communications, Inc.",0001315255,lopucki_brd,1,10/31/2021,chapter_11
+,"GWG Holdings, Inc.",0001522690,lopucki_brd,1,4/20/2022,chapter_11
+,Garrett Motion Inc.,0001735707,lopucki_brd,1,9/20/2020,chapter_11
+,"GenOn Energy, Inc.",0001126294,lopucki_brd,1,6/14/2017,chapter_11
+,Genco Shipping & Trading Limited,0001326200,lopucki_brd,1,4/21/2014,chapter_11
+,General Maritime Corporation,0001443799,lopucki_brd,1,11/17/2011,chapter_11
+,Global Aviation Holdings Inc. (2012),0001397867,lopucki_brd,1,2/5/2012,chapter_11
+,"Global Brokerage, Inc.",0001499912,lopucki_brd,1,12/11/2017,chapter_11
+,Global Eagle Entertainment Inc.,0001512077,lopucki_brd,1,7/22/2020,chapter_11
+,"Great Atlantic & Pacific Tea Company, Inc.",0000043300,lopucki_brd,1,12/12/2010,chapter_11
+,"GulfMark Offshore, Inc.",0001030749,lopucki_brd,1,5/17/2017,chapter_11
+,Gulfport Energy Corporation,0000874499,lopucki_brd,1,11/13/2020,chapter_11
+,Gymboree Corporation (2019),0000786110,lopucki_brd,1,1/16/2019,chapter_11
+,Halcon Resources Corporation (2019),0001282648,lopucki_brd,1,8/7/2019,chapter_11
+,"Harrington West Financial Group, Inc.",0001063997,lopucki_brd,1,9/10/2010,chapter_11
+,"Hawker Beechcraft Acquisition Company, LLC",0001396426,lopucki_brd,1,5/3/2012,chapter_11
+,"Hercules Offshore, Inc. (2016)",0001330849,lopucki_brd,1,6/5/2016,chapter_11
+,"Hertz Global Holdings, Inc. (Hertz Corporation)",0001657853,lopucki_brd,1,5/22/2020,chapter_11
+,Hexion Inc.,0000013239,lopucki_brd,1,4/1/2019,chapter_11
+,Hi-Crush Inc.,0001549848,lopucki_brd,1,7/12/2020,chapter_11
+,HighPoint Resources Corporation,0001725526,lopucki_brd,1,3/14/2021,chapter_11
+,"Hornbeck Offshore Services, Inc.",0001131227,lopucki_brd,1,5/19/2020,chapter_11
+,"Hospitality Investors Trust, Inc.",0001583077,lopucki_brd,1,5/19/2021,chapter_11
+,Illinois Power Generating Company,0001135361,lopucki_brd,1,12/9/2016,chapter_11
+,Intelsat S.A.,0001525773,lopucki_brd,1,5/13/2020,chapter_11
+,Internap Corporation,0001056386,lopucki_brd,1,3/16/2020,chapter_11
+,"J. C. Penney Company, Inc.",0001166126,lopucki_brd,1,5/15/2020,chapter_11
+,"J. Crew Group, Inc.",0001051251,lopucki_brd,1,5/4/2020,chapter_11
+,J.G. Wentworth Company,0001580185,lopucki_brd,1,12/12/2017,chapter_11
+,James River Coal Company,0001297720,lopucki_brd,1,4/7/2014,chapter_11
+,"KIT digital, Inc.",0001076700,lopucki_brd,1,4/25/2013,chapter_11
+,"Key Energy Services, Inc.",0000318996,lopucki_brd,1,10/24/2016,chapter_11
+,"LSC Communications, Inc.",0001669812,lopucki_brd,1,4/13/2020,chapter_11
+,"Lee Enterprises, Incorporated",0000058361,lopucki_brd,1,12/12/2011,chapter_11
+,Legacy Reserves Inc.,0001735828,lopucki_brd,1,6/18/2019,chapter_11
+,Libbey Inc.,0000902274,lopucki_brd,1,6/1/2020,chapter_11
+,"LifeCare Holdings, Inc.",0001358057,lopucki_brd,1,12/11/2012,chapter_11
+,"Linn Energy, LLC",0001326428,lopucki_brd,1,5/11/2016,chapter_11
+,"Local Insight Regatta Holdings, Inc.",0001439600,lopucki_brd,1,11/17/2010,chapter_11
+,Lonestar Resources US Inc.,0001661920,lopucki_brd,1,9/30/2020,chapter_11
+,MF Global Holdings Ltd.,0001401106,lopucki_brd,1,10/31/2011,chapter_11
+,MModal Inc.,0001441567,lopucki_brd,1,3/20/2014,chapter_11
+,Magnum Hunter Resources Corporation,0001335190,lopucki_brd,1,12/15/2015,chapter_11
+,Mallinckrodt plc,0001567892,lopucki_brd,1,10/12/2020,chapter_11
+,Mattress Firm Holding Corp.,0001419852,lopucki_brd,1,10/5/2018,chapter_11
+,McClatchy Company,0001056087,lopucki_brd,1,2/13/2020,chapter_11
+,"McDermott International, Inc.",0000708819,lopucki_brd,1,1/21/2020,chapter_11
+,"MediaNews Group, Inc. (Affiliated Media, Inc. only)",0000918944,lopucki_brd,1,1/22/2010,chapter_11
+,Memorial Production Partners LP,0001521847,lopucki_brd,1,1/16/2017,chapter_11
+,"Mercantile Bancorp, Inc.",0001289701,lopucki_brd,1,6/27/2013,chapter_11
+,"Mesa Air Group, Inc.",0000810332,lopucki_brd,1,1/5/2010,chapter_11
+,"Midstates Petroleum Company, Inc.",0001533924,lopucki_brd,1,4/30/2016,chapter_11
+,"Midwest Banc Holdings, Inc.",0001051379,lopucki_brd,1,8/20/2010,chapter_11
+,"Miller Energy Resources, Inc.",0000785968,lopucki_brd,1,8/6/2015,chapter_11
+,"Molycorp, Inc.",0001489137,lopucki_brd,1,6/25/2015,chapter_11
+,Momentive Performance Materials Inc.,0001405041,lopucki_brd,1,4/13/2014,chapter_11
+,"Monitronics International, Inc.",0001265107,lopucki_brd,1,6/30/2019,chapter_11
+,"Movie Gallery, Inc. (2010)",0000925178,lopucki_brd,1,2/2/2010,chapter_11
+,"NII Holdings, Inc. (2014)",0001037016,lopucki_brd,1,9/15/2014,chapter_11
+,"Nebraska Book Company, Inc.",0001056758,lopucki_brd,1,6/27/2011,chapter_11
+,Neff Corp.,0001057725,lopucki_brd,1,5/16/2010,chapter_11
+,Neiman Marcus Group LTD LLC,0001358651,lopucki_brd,1,5/7/2020,chapter_11
+,NewPage Corporation,0001329069,lopucki_brd,1,9/7/2011,chapter_11
+,"Newark Group, Inc.",0001047290,lopucki_brd,1,6/9/2010,chapter_11
+,Nexity Financial Corporation,0001084727,lopucki_brd,1,7/22/2010,chapter_11
+,Noble Corporation plc,0001458891,lopucki_brd,1,7/31/2020,chapter_11
+,Noranda Aluminum Holding Corporation,0001422105,lopucki_brd,1,2/8/2016,chapter_11
+,Oasis Petroleum Inc.,0001486159,lopucki_brd,1,9/30/2020,chapter_11
+,"Orleans Homebuilders, Inc.",0000038570,lopucki_brd,1,3/1/2010,chapter_11
+,"Overseas Shipholding Group, Inc.",0000075208,lopucki_brd,1,11/14/2012,chapter_11
+,PG&E Corp. (Pacific Gas and Electric Co.) (2019),0001004980,lopucki_brd,1,1/29/2019,chapter_11
+,"PHI, Inc.",0000350403,lopucki_brd,1,3/14/2019,chapter_11
+,"PMI Group, Inc.",0000935724,lopucki_brd,1,11/23/2011,chapter_11
+,Pacific Drilling S.A. (2020),0001517342,lopucki_brd,1,10/30/2020,chapter_11
+,Paragon Offshore plc (2017),0001594590,lopucki_brd,1,7/20/2017,chapter_11
+,Parker Drilling Company,0000076321,lopucki_brd,1,12/12/2018,chapter_11
+,Patriot Coal Corporation (2015),0001376812,lopucki_brd,1,5/12/2015,chapter_11
+,Peabody Energy Corporation,0001064728,lopucki_brd,1,4/13/2016,chapter_11
+,Penn Virginia Corporation,0000077159,lopucki_brd,1,5/12/2016,chapter_11
+,Pennsylvania Real Estate Investment Trust,0000077281,lopucki_brd,1,11/1/2020,chapter_11
+,"Penson Worldwide, Inc.",0001123541,lopucki_brd,1,1/11/2013,chapter_11
+,Performance Sports Group Ltd.,0001514242,lopucki_brd,1,10/31/2016,chapter_11
+,"Pier 1 Imports, Inc.",0000278130,lopucki_brd,1,2/17/2020,chapter_11
+,Pinnacle Airlines Corp.,0001166291,lopucki_brd,1,4/1/2012,chapter_11
+,Pioneer Energy Services Corp.,0000320575,lopucki_brd,1,3/1/2020,chapter_11
+,"Pyxus International, Inc.",0000939930,lopucki_brd,1,6/15/2020,chapter_11
+,Quicksilver Resources Inc.,0001060990,lopucki_brd,1,3/17/2015,chapter_11
+,"Quiksilver, Inc.",0000805305,lopucki_brd,1,9/9/2015,chapter_11
+,Quorum Health Corporation,0001650445,lopucki_brd,1,4/7/2020,chapter_11
+,RAIT Financial Trust,0001045425,lopucki_brd,1,8/30/2019,chapter_11
+,RCS Capital Corporation,0001568832,lopucki_brd,1,1/31/2016,chapter_11
+,RDA Holding Co. (2013),0001503813,lopucki_brd,1,2/17/2013,chapter_11
+,"RHI Entertainment, Inc.",0001410637,lopucki_brd,1,12/10/2010,chapter_11
+,RadioShack Corporation,0000096289,lopucki_brd,1,2/5/2015,chapter_11
+,"Real Industry, Inc.",0000038984,lopucki_brd,1,11/17/2017,chapter_11
+,Republic Airways Holdings Inc.,0001159154,lopucki_brd,1,2/25/2016,chapter_11
+,"Revel AC, Inc. (2014)",0001551510,lopucki_brd,1,6/19/2014,chapter_11
+,"Revlon, Inc. (Revlon Consumer Products Corporation)",0000887921,lopucki_brd,1,6/15/2022,chapter_11
+,Rex Energy Corporation,0001397516,lopucki_brd,1,5/18/2018,chapter_11
+,Rosehill Resources Inc.,0001659122,lopucki_brd,1,7/26/2020,chapter_11
+,"SFX Entertainment, Inc.",0001553588,lopucki_brd,1,2/1/2016,chapter_11
+,Sabine Oil & Gas Corporation,0000038079,lopucki_brd,1,7/15/2015,chapter_11
+,Samson Resources Corporation,0001548691,lopucki_brd,1,9/16/2015,chapter_11
+,Sanchez Energy Corporation,0001528837,lopucki_brd,1,8/11/2019,chapter_11
+,"SandRidge Energy, Inc.",0001349436,lopucki_brd,1,5/16/2016,chapter_11
+,"Seahawk Drilling, Inc.",0001452384,lopucki_brd,1,2/11/2011,chapter_11
+,Sears Holdings Corporation,0001310067,lopucki_brd,1,10/15/2018,chapter_11
+,"Sequential Brands Group, Inc.",0001648428,lopucki_brd,1,8/31/2021,chapter_11
+,Seventy Seven Energy Inc.,0001532930,lopucki_brd,1,6/7/2016,chapter_11
+,"Southcross Energy Partners, L.P.",0001547638,lopucki_brd,1,4/1/2019,chapter_11
+,"Stage Stores, Inc. (2020)",0000006885,lopucki_brd,1,5/10/2020,chapter_11
+,"Stein Mart, Inc.",0000884940,lopucki_brd,1,8/12/2020,chapter_11
+,Stone Energy Corporation,0000904080,lopucki_brd,1,12/14/2016,chapter_11
+,"SunEdison, Inc.",0000945436,lopucki_brd,1,4/21/2016,chapter_11
+,"SuperMedia, Inc. (2013)",0001367396,lopucki_brd,1,3/18/2013,chapter_11
+,"Superior Energy Services, Inc.",0000886835,lopucki_brd,1,12/7/2020,chapter_11
+,Swift Energy Company,0000351817,lopucki_brd,1,12/31/2015,chapter_11
+,TBS International plc,0001479920,lopucki_brd,1,2/6/2012,chapter_11
+,"Tailored Brands, Inc.",0000884217,lopucki_brd,1,8/2/2020,chapter_11
+,TerreStar Corporation (2011),0000913665,lopucki_brd,1,2/16/2011,chapter_11
+,Tidewater Inc.,0000098222,lopucki_brd,1,5/17/2017,chapter_11
+,Tops Holding II Corporation,0001584701,lopucki_brd,1,2/21/2018,chapter_11
+,"Town Sports International Holdings, Inc. (TSI, LLC only)",0001281774,lopucki_brd,1,9/14/2020,chapter_11
+,"Toys R Us, Inc.",0001005414,lopucki_brd,1,9/19/2017,chapter_11
+,Triad Guaranty Inc.,0000911631,lopucki_brd,1,6/3/2013,chapter_11
+,Triangle Petroleum Corp. (Triangle USA Petroleum Corp. only),0001281922,lopucki_brd,1,6/29/2016,chapter_11
+,"Trico Marine Services, Inc. (2010)",0000921549,lopucki_brd,1,8/25/2010,chapter_11
+,"Trump Entertainment Resorts, Inc. (2014)",0000943320,lopucki_brd,1,9/9/2014,chapter_11
+,USEC Inc.,0001065059,lopucki_brd,1,3/5/2014,chapter_11
+,Ultra Petroleum Corp. (2020),0001022646,lopucki_brd,1,5/14/2020,chapter_11
+,Unit Corporation,0000798949,lopucki_brd,1,5/22/2020,chapter_11
+,"United Western Bancorp, Inc.",0000944725,lopucki_brd,1,3/2/2012,chapter_11
+,Valaris plc,0000314808,lopucki_brd,1,8/19/2020,chapter_11
+,"Vanguard Natural Resources, LLC",0001384072,lopucki_brd,1,2/1/2017,chapter_11
+,Verso Corporation,0001421182,lopucki_brd,1,1/26/2016,chapter_11
+,"Vertis, Inc. (2010)",0001178717,lopucki_brd,1,11/17/2010,chapter_11
+,"Walter Energy, Inc.",0000837173,lopucki_brd,1,7/15/2015,chapter_11
+,"Washington Prime Group Inc. (Washington Prime Group, L.P.)",0001594686,lopucki_brd,1,6/13/2021,chapter_11
+,Weatherford International plc,0001603923,lopucki_brd,1,7/1/2019,chapter_11
+,Westmoreland Coal Company (2018),0000106455,lopucki_brd,1,10/9/2018,chapter_11
+,Whiting Petroleum Corporation,0001255474,lopucki_brd,1,4/1/2020,chapter_11
+,William Lyon Homes,0001095996,lopucki_brd,1,12/19/2011,chapter_11
+,"Windstream Holdings, Inc. (Windstream Services, LLC)",0001282266,lopucki_brd,1,2/25/2019,chapter_11
+,"Xerium Technologies, Inc.",0001287151,lopucki_brd,1,3/30/2010,chapter_11
+,"iHeartMedia, Inc.",0001400891,lopucki_brd,1,3/14/2018,chapter_11
+MMM,3M,0000066740,sp500,0,,
+AOS,A. O. Smith,0000091142,sp500,0,,
+AES,AES Corporation,0000874761,sp500,0,,
+APA,APA Corporation,0001841666,sp500,0,,
+T,AT&T,0000732717,sp500,0,,
 ABBV,AbbVie,0001551152,sp500,0,,
-ABNB,Airbnb,0001559720,sp500,0,,
 ABT,Abbott Laboratories,0000001800,sp500,0,,
-ACGL,Arch Capital Group,0000947484,sp500,0,,
 ACN,Accenture,0001467373,sp500,0,,
 ADBE,Adobe Inc.,0000796343,sp500,0,,
-ADI,Analog Devices,0000006281,sp500,0,,
-ADM,Archer Daniels Midland,0000007084,sp500,0,,
-ADP,Automatic Data Processing,0000008670,sp500,0,,
-ADSK,Autodesk,0000769397,sp500,0,,
-AEE,Ameren,0001002910,sp500,0,,
-AEP,American Electric Power,0000004904,sp500,0,,
-AES,AES Corporation,0000874761,sp500,0,,
+AMD,Advanced Micro Devices,0000002488,sp500,0,,
 AFL,Aflac,0000004977,sp500,0,,
-AIG,American International Group,0000005272,sp500,0,,
-AIZ,Assurant,0001267238,sp500,0,,
-AJG,Arthur J. Gallagher & Co.,0000354190,sp500,0,,
+A,Agilent Technologies,0001090872,sp500,0,,
+APD,Air Products,0000002969,sp500,0,,
+ABNB,Airbnb,0001559720,sp500,0,,
 AKAM,Akamai Technologies,0001086222,sp500,0,,
 ALB,Albemarle Corporation,0000915913,sp500,0,,
+ARE,Alexandria Real Estate Equities,0001035443,sp500,0,,
 ALGN,Align Technology,0001097149,sp500,0,,
-ALL,Allstate,0000899051,sp500,0,,
 ALLE,Allegion,0001579241,sp500,0,,
-AMAT,Applied Materials,0000006951,sp500,0,,
+LNT,Alliant Energy,0000352541,sp500,0,,
+ALL,Allstate,0000899051,sp500,0,,
+GOOGL,Alphabet Inc. (Class A),0001652044,sp500,0,,
+MO,Altria,0000764180,sp500,0,,
+AMZN,Amazon,0001018724,sp500,0,,
 AMCR,Amcor,0001748790,sp500,0,,
-AMD,Advanced Micro Devices,0000002488,sp500,0,,
+AEE,Ameren,0001002910,sp500,0,,
+AEP,American Electric Power,0000004904,sp500,0,,
+AXP,American Express,0000004962,sp500,0,,
+AIG,American International Group,0000005272,sp500,0,,
+AMT,American Tower,0001053507,sp500,0,,
+AWK,American Water Works,0001410636,sp500,0,,
+AMP,Ameriprise Financial,0000820027,sp500,0,,
 AME,Ametek,0001037868,sp500,0,,
 AMGN,Amgen,0000318154,sp500,0,,
-AMP,Ameriprise Financial,0000820027,sp500,0,,
-AMT,American Tower,0001053507,sp500,0,,
-AMZN,Amazon,0001018724,sp500,0,,
-ANET,Arista Networks,0001596532,sp500,0,,
-AON,Aon plc,0000315293,sp500,0,,
-AOS,A. O. Smith,0000091142,sp500,0,,
-APA,APA Corporation,0001841666,sp500,0,,
-APD,Air Products,0000002969,sp500,0,,
 APH,Amphenol,0000820313,sp500,0,,
+ADI,Analog Devices,0000006281,sp500,0,,
+AON,Aon plc,0000315293,sp500,0,,
 APO,Apollo Global Management,0001858681,sp500,0,,
 APP,AppLovin,0001751008,sp500,0,,
+AAPL,Apple Inc.,0000320193,sp500,0,,
+AMAT,Applied Materials,0000006951,sp500,0,,
 APTV,Aptiv,0001521332,sp500,0,,
-ARE,Alexandria Real Estate Equities,0001035443,sp500,0,,
+ACGL,Arch Capital Group,0000947484,sp500,0,,
+ADM,Archer Daniels Midland,0000007084,sp500,0,,
 ARES,Ares Management,0001176948,sp500,0,,
+ANET,Arista Networks,0001596532,sp500,0,,
+AJG,Arthur J. Gallagher & Co.,0000354190,sp500,0,,
+AIZ,Assurant,0001267238,sp500,0,,
 ATO,Atmos Energy,0000731802,sp500,0,,
-AVB,AvalonBay Communities,0000915912,sp500,0,,
-AVGO,Broadcom,0001730168,sp500,0,,
-AVY,Avery Dennison,0000008818,sp500,0,,
-AWK,American Water Works,0001410636,sp500,0,,
-AXON,Axon Enterprise,0001069183,sp500,0,,
-AXP,American Express,0000004962,sp500,0,,
 AZO,AutoZone,0000866787,sp500,0,,
-BA,Boeing,0000012927,sp500,0,,
-BAC,Bank of America,0000070858,sp500,0,,
-BALL,Ball Corporation,0000009389,sp500,0,,
-BAX,Baxter International,0000010456,sp500,0,,
-BBY,Best Buy,0000764478,sp500,0,,
-BDX,Becton Dickinson,0000010795,sp500,0,,
-BEN,Franklin Resources,0000038777,sp500,0,,
-BF-B,Brown–Forman,0000014693,sp500,0,,
-BG,Bunge Global,0001996862,sp500,0,,
-BIIB,Biogen,0000875045,sp500,0,,
+ADSK,Autodesk,0000769397,sp500,0,,
+ADP,Automatic Data Processing,0000008670,sp500,0,,
+AVB,AvalonBay Communities,0000915912,sp500,0,,
+AVY,Avery Dennison,0000008818,sp500,0,,
+AXON,Axon Enterprise,0001069183,sp500,0,,
 BK,BNY Mellon,0001390777,sp500,0,,
-BKNG,Booking Holdings,0001075531,sp500,0,,
-BKR,Baker Hughes,0001701605,sp500,0,,
-BLDR,Builders FirstSource,0001316835,sp500,0,,
-BLK,BlackRock,0002012383,sp500,0,,
-BMY,Bristol Myers Squibb,0000014272,sp500,0,,
-BR,Broadridge Financial Solutions,0001383312,sp500,0,,
-BRK-B,Berkshire Hathaway,0001067983,sp500,0,,
-BRO,Brown & Brown,0000079282,sp500,0,,
-BSX,Boston Scientific,0000885725,sp500,0,,
-BX,Blackstone Inc.,0001393818,sp500,0,,
 BXP,"BXP, Inc.",0001037540,sp500,0,,
-CAG,Conagra Brands,0000023217,sp500,0,,
+BKR,Baker Hughes,0001701605,sp500,0,,
+BALL,Ball Corporation,0000009389,sp500,0,,
+BAC,Bank of America,0000070858,sp500,0,,
+BAX,Baxter International,0000010456,sp500,0,,
+BDX,Becton Dickinson,0000010795,sp500,0,,
+BRK-B,Berkshire Hathaway,0001067983,sp500,0,,
+BBY,Best Buy,0000764478,sp500,0,,
+TECH,Bio-Techne,0000842023,sp500,0,,
+BIIB,Biogen,0000875045,sp500,0,,
+BLK,BlackRock,0002012383,sp500,0,,
+BX,Blackstone Inc.,0001393818,sp500,0,,
+XYZ,"Block, Inc.",0001512673,sp500,0,,
+BA,Boeing,0000012927,sp500,0,,
+BKNG,Booking Holdings,0001075531,sp500,0,,
+BSX,Boston Scientific,0000885725,sp500,0,,
+BMY,Bristol Myers Squibb,0000014272,sp500,0,,
+AVGO,Broadcom,0001730168,sp500,0,,
+BR,Broadridge Financial Solutions,0001383312,sp500,0,,
+BRO,Brown & Brown,0000079282,sp500,0,,
+BF-B,Brown–Forman,0000014693,sp500,0,,
+BLDR,Builders FirstSource,0001316835,sp500,0,,
+BG,Bunge Global,0001996862,sp500,0,,
+CHRW,C.H. Robinson,0001043277,sp500,0,,
+CBRE,CBRE Group,0001138118,sp500,0,,
+CDW,CDW Corporation,0001402057,sp500,0,,
+CF,CF Industries,0001324404,sp500,0,,
+CME,CME Group,0001156375,sp500,0,,
+CMS,CMS Energy,0000811156,sp500,0,,
+CRH,CRH plc,0000849395,sp500,0,,
+CSX,CSX Corporation,0000277948,sp500,0,,
+CVS,CVS Health,0000064803,sp500,0,,
+CDNS,Cadence Design Systems,0000813672,sp500,0,,
+CPT,Camden Property Trust,0000906345,sp500,0,,
+CPB,Campbell's Company (The),0000016732,sp500,0,,
+COF,Capital One,0000927628,sp500,0,,
 CAH,Cardinal Health,0000721371,sp500,0,,
+CCL,Carnival,0000815097,sp500,0,,
 CARR,Carrier Global,0001783180,sp500,0,,
+CVNA,Carvana,0001690820,sp500,0,,
 CASY,Casey's,0000726958,sp500,0,,
 CAT,Caterpillar Inc.,0000018230,sp500,0,,
-CB,Chubb Limited,0000896159,sp500,0,,
 CBOE,Cboe Global Markets,0001374310,sp500,0,,
-CBRE,CBRE Group,0001138118,sp500,0,,
-CCI,Crown Castle,0001051470,sp500,0,,
-CCL,Carnival,0000815097,sp500,0,,
-CDNS,Cadence Design Systems,0000813672,sp500,0,,
-CDW,CDW Corporation,0001402057,sp500,0,,
-CEG,Constellation Energy,0001868275,sp500,0,,
-CF,CF Industries,0001324404,sp500,0,,
-CFG,Citizens Financial Group,0000759944,sp500,0,,
-CHD,Church & Dwight,0000313927,sp500,0,,
-CHRW,C.H. Robinson,0001043277,sp500,0,,
-CHTR,Charter Communications,0001091667,sp500,0,,
-CI,Cigna,0001739940,sp500,0,,
-CIEN,Ciena,0000936395,sp500,0,,
-CINF,Cincinnati Financial,0000020286,sp500,0,,
-CL,Colgate-Palmolive,0000021665,sp500,0,,
-CLX,Clorox,0000021076,sp500,0,,
-CMCSA,Comcast,0001166691,sp500,0,,
-CME,CME Group,0001156375,sp500,0,,
-CMG,Chipotle Mexican Grill,0001058090,sp500,0,,
-CMI,Cummins,0000026172,sp500,0,,
-CMS,CMS Energy,0000811156,sp500,0,,
+COR,Cencora,0001140859,sp500,0,,
 CNC,Centene Corporation,0001071739,sp500,0,,
 CNP,CenterPoint Energy,0001130310,sp500,0,,
-COF,Capital One,0000927628,sp500,0,,
+CRL,Charles River Laboratories,0001100682,sp500,0,,
+SCHW,Charles Schwab Corporation,0000316709,sp500,0,,
+CHTR,Charter Communications,0001091667,sp500,0,,
+CVX,Chevron Corporation,0000093410,sp500,0,,
+CMG,Chipotle Mexican Grill,0001058090,sp500,0,,
+CB,Chubb Limited,0000896159,sp500,0,,
+CHD,Church & Dwight,0000313927,sp500,0,,
+CIEN,Ciena,0000936395,sp500,0,,
+CI,Cigna,0001739940,sp500,0,,
+CINF,Cincinnati Financial,0000020286,sp500,0,,
+CTAS,Cintas,0000723254,sp500,0,,
+CSCO,Cisco,0000858877,sp500,0,,
+C,Citigroup,0000831001,sp500,0,,
+CFG,Citizens Financial Group,0000759944,sp500,0,,
+CLX,Clorox,0000021076,sp500,0,,
+CSGP,CoStar Group,0001057352,sp500,0,,
+KO,Coca-Cola Company (The),0000021344,sp500,0,,
+CTSH,Cognizant,0001058290,sp500,0,,
 COHR,Coherent Corp.,0000820318,sp500,0,,
 COIN,Coinbase,0001679788,sp500,0,,
-COO,Cooper Companies (The),0000711404,sp500,0,,
+CL,Colgate-Palmolive,0000021665,sp500,0,,
+CMCSA,Comcast,0001166691,sp500,0,,
+FIX,Comfort Systems USA,0001035983,sp500,0,,
+CAG,Conagra Brands,0000023217,sp500,0,,
 COP,ConocoPhillips,0001163165,sp500,0,,
-COR,Cencora,0001140859,sp500,0,,
-COST,Costco,0000909832,sp500,0,,
-CPAY,Corpay,0001175454,sp500,0,,
-CPB,Campbell's Company (The),0000016732,sp500,0,,
+ED,Consolidated Edison,0001047862,sp500,0,,
+STZ,Constellation Brands,0000016918,sp500,0,,
+CEG,Constellation Energy,0001868275,sp500,0,,
+COO,Cooper Companies (The),0000711404,sp500,0,,
 CPRT,Copart,0000900075,sp500,0,,
-CPT,Camden Property Trust,0000906345,sp500,0,,
-CRH,CRH plc,0000849395,sp500,0,,
-CRL,Charles River Laboratories,0001100682,sp500,0,,
-CRM,Salesforce,0001108524,sp500,0,,
-CRWD,CrowdStrike,0001535527,sp500,0,,
-CSCO,Cisco,0000858877,sp500,0,,
-CSGP,CoStar Group,0001057352,sp500,0,,
-CSX,CSX Corporation,0000277948,sp500,0,,
-CTAS,Cintas,0000723254,sp500,0,,
-CTRA,Coterra,0000858470,sp500,0,,
-CTSH,Cognizant,0001058290,sp500,0,,
+GLW,Corning Inc.,0000024741,sp500,0,,
+CPAY,Corpay,0001175454,sp500,0,,
 CTVA,Corteva,0001755672,sp500,0,,
-CVNA,Carvana,0001690820,sp500,0,,
-CVS,CVS Health,0000064803,sp500,0,,
-CVX,Chevron Corporation,0000093410,sp500,0,,
-D,Dominion Energy,0000715957,sp500,0,,
-DAL,Delta Air Lines,0000027904,sp500,0,,
-DASH,DoorDash,0001792789,sp500,0,,
-DD,DuPont,0001666700,sp500,0,,
-DDOG,Datadog,0001561550,sp500,0,,
-DE,Deere & Company,0000315189,sp500,0,,
-DECK,Deckers Brands,0000910521,sp500,0,,
-DELL,Dell Technologies,0001571996,sp500,0,,
-DG,Dollar General,0000029534,sp500,0,,
-DGX,Quest Diagnostics,0001022079,sp500,0,,
+COST,Costco,0000909832,sp500,0,,
+CTRA,Coterra,0000858470,sp500,0,,
+CRWD,CrowdStrike,0001535527,sp500,0,,
+CCI,Crown Castle,0001051470,sp500,0,,
+CMI,Cummins,0000026172,sp500,0,,
 DHI,D. R. Horton,0000882184,sp500,0,,
-DHR,Danaher Corporation,0000313616,sp500,0,,
-DIS,Walt Disney Company (The),0001744489,sp500,0,,
-DLR,Digital Realty,0001297996,sp500,0,,
-DLTR,Dollar Tree,0000935703,sp500,0,,
-DOC,Healthpeak Properties,0000765880,sp500,0,,
-DOV,Dover Corporation,0000029905,sp500,0,,
-DOW,Dow Inc.,0001751788,sp500,0,,
-DPZ,Domino's,0001286681,sp500,0,,
-DRI,Darden Restaurants,0000940944,sp500,0,,
 DTE,DTE Energy,0000936340,sp500,0,,
-DUK,Duke Energy,0001326160,sp500,0,,
 DVA,DaVita,0000927066,sp500,0,,
+DHR,Danaher Corporation,0000313616,sp500,0,,
+DRI,Darden Restaurants,0000940944,sp500,0,,
+DDOG,Datadog,0001561550,sp500,0,,
+DECK,Deckers Brands,0000910521,sp500,0,,
+DE,Deere & Company,0000315189,sp500,0,,
+DELL,Dell Technologies,0001571996,sp500,0,,
+DAL,Delta Air Lines,0000027904,sp500,0,,
 DVN,Devon Energy,0001090012,sp500,0,,
 DXCM,Dexcom,0001093557,sp500,0,,
-EA,Electronic Arts,0000712515,sp500,0,,
-EBAY,eBay Inc.,0001065088,sp500,0,,
+FANG,Diamondback Energy,0001539838,sp500,0,,
+DLR,Digital Realty,0001297996,sp500,0,,
+DG,Dollar General,0000029534,sp500,0,,
+DLTR,Dollar Tree,0000935703,sp500,0,,
+D,Dominion Energy,0000715957,sp500,0,,
+DPZ,Domino's,0001286681,sp500,0,,
+DASH,DoorDash,0001792789,sp500,0,,
+DOV,Dover Corporation,0000029905,sp500,0,,
+DOW,Dow Inc.,0001751788,sp500,0,,
+DD,DuPont,0001666700,sp500,0,,
+DUK,Duke Energy,0001326160,sp500,0,,
+EOG,EOG Resources,0000821189,sp500,0,,
+EPAM,EPAM Systems,0001352010,sp500,0,,
+EQT,EQT Corporation,0000033213,sp500,0,,
+ETN,Eaton Corporation,0001551182,sp500,0,,
+SATS,EchoStar,0001415404,sp500,0,,
 ECL,Ecolab,0000031462,sp500,0,,
-ED,Consolidated Edison,0001047862,sp500,0,,
-EFX,Equifax,0000033185,sp500,0,,
-EG,Everest Group,0001095073,sp500,0,,
 EIX,Edison International,0000827052,sp500,0,,
-EL,Estée Lauder Companies (The),0001001250,sp500,0,,
+EW,Edwards Lifesciences,0001099800,sp500,0,,
+EA,Electronic Arts,0000712515,sp500,0,,
 ELV,Elevance Health,0001156039,sp500,0,,
 EME,Emcor,0000105634,sp500,0,,
 EMR,Emerson Electric,0000032604,sp500,0,,
-EOG,EOG Resources,0000821189,sp500,0,,
-EPAM,EPAM Systems,0001352010,sp500,0,,
+ETR,Entergy,0000065984,sp500,0,,
+EFX,Equifax,0000033185,sp500,0,,
 EQIX,Equinix,0001101239,sp500,0,,
 EQR,Equity Residential,0000906107,sp500,0,,
-EQT,EQT Corporation,0000033213,sp500,0,,
 ERIE,Erie Indemnity,0000922621,sp500,0,,
-ES,Eversource Energy,0000072741,sp500,0,,
 ESS,Essex Property Trust,0000920522,sp500,0,,
-ETN,Eaton Corporation,0001551182,sp500,0,,
-ETR,Entergy,0000065984,sp500,0,,
+EL,Estée Lauder Companies (The),0001001250,sp500,0,,
+EG,Everest Group,0001095073,sp500,0,,
 EVRG,Evergy,0001711269,sp500,0,,
-EW,Edwards Lifesciences,0001099800,sp500,0,,
+ES,Eversource Energy,0000072741,sp500,0,,
 EXC,Exelon,0001109357,sp500,0,,
-EXE,Expand Energy,0000895126,sp500,0,,
 EXPE,Expedia Group,0001324424,sp500,0,,
+EXPD,Expeditors International,0000746515,sp500,0,,
 EXR,Extra Space Storage,0001289490,sp500,0,,
-F,Ford Motor Company,0000037996,sp500,0,,
-FANG,Diamondback Energy,0001539838,sp500,0,,
-FAST,Fastenal,0000815556,sp500,0,,
-FCX,Freeport-McMoRan,0000831259,sp500,0,,
-FDS,FactSet,0001013237,sp500,0,,
-FDX,FedEx,0001048911,sp500,0,,
-FE,FirstEnergy,0001031296,sp500,0,,
+XOM,ExxonMobil,0000034088,sp500,0,,
 FFIV,"F5, Inc.",0001048695,sp500,0,,
+FDS,FactSet,0001013237,sp500,0,,
 FICO,Fair Isaac,0000814547,sp500,0,,
-FIS,Fidelity National Information Services,0001136893,sp500,0,,
-FISV,Fiserv,0000798354,sp500,0,,
-FITB,Fifth Third Bancorp,0000035527,sp500,0,,
-FOX,Fox Corporation (Class B),0001754301,sp500,0,,
+FAST,Fastenal,0000815556,sp500,0,,
+FDX,FedEx,0001048911,sp500,0,,
 FRT,Federal Realty Investment Trust,0000034903,sp500,0,,
+FIS,Fidelity National Information Services,0001136893,sp500,0,,
+FITB,Fifth Third Bancorp,0000035527,sp500,0,,
 FSLR,First Solar,0001274494,sp500,0,,
+FE,FirstEnergy,0001031296,sp500,0,,
+FISV,Fiserv,0000798354,sp500,0,,
+F,Ford Motor Company,0000037996,sp500,0,,
 FTNT,Fortinet,0001262039,sp500,0,,
 FTV,Fortive,0001659166,sp500,0,,
-GD,General Dynamics,0000040533,sp500,0,,
-GDDY,GoDaddy,0001609711,sp500,0,,
+FOXA,Fox Corporation (Class A),0001754301,sp500,0,,
+BEN,Franklin Resources,0000038777,sp500,0,,
+FCX,Freeport-McMoRan,0000831259,sp500,0,,
 GE,GE Aerospace,0000040545,sp500,0,,
 GEHC,GE HealthCare,0001932393,sp500,0,,
-GEN,Gen Digital,0000849399,sp500,0,,
 GEV,GE Vernova,0001996810,sp500,0,,
-GILD,Gilead Sciences,0000882095,sp500,0,,
-GIS,General Mills,0000040704,sp500,0,,
-GL,Globe Life,0000320335,sp500,0,,
-GLW,Corning Inc.,0000024741,sp500,0,,
-GNRC,Generac,0001474735,sp500,0,,
-GOOG,Alphabet Inc. (Class C),0001652044,sp500,0,,
-GPC,Genuine Parts Company,0000040987,sp500,0,,
-GPN,Global Payments,0001123360,sp500,0,,
 GRMN,Garmin,0001121788,sp500,0,,
+IT,Gartner,0000749251,sp500,0,,
+GEN,Gen Digital,0000849399,sp500,0,,
+GNRC,Generac,0001474735,sp500,0,,
+GD,General Dynamics,0000040533,sp500,0,,
+GIS,General Mills,0000040704,sp500,0,,
+GM,General Motors,0001467858,sp500,0,,
+GPC,Genuine Parts Company,0000040987,sp500,0,,
+GILD,Gilead Sciences,0000882095,sp500,0,,
+GPN,Global Payments,0001123360,sp500,0,,
+GL,Globe Life,0000320335,sp500,0,,
+GDDY,GoDaddy,0001609711,sp500,0,,
 GS,Goldman Sachs,0000886982,sp500,0,,
-GWW,W. W. Grainger,0000277135,sp500,0,,
-HAL,Halliburton,0000045012,sp500,0,,
-HAS,Hasbro,0000046080,sp500,0,,
-HBAN,Huntington Bancshares,0000049196,sp500,0,,
 HCA,HCA Healthcare,0000860730,sp500,0,,
-HD,Home Depot (The),0000354950,sp500,0,,
-HIG,Hartford (The),0000874766,sp500,0,,
-HII,Huntington Ingalls Industries,0001501585,sp500,0,,
-HLT,Hilton Worldwide,0001585689,sp500,0,,
-HON,Honeywell,0000773840,sp500,0,,
-HOOD,Robinhood Markets,0001783879,sp500,0,,
-HPE,Hewlett Packard Enterprise,0001645590,sp500,0,,
 HPQ,HP Inc.,0000047217,sp500,0,,
-HRL,Hormel Foods,0000048465,sp500,0,,
+HAL,Halliburton,0000045012,sp500,0,,
+HIG,Hartford (The),0000874766,sp500,0,,
+HAS,Hasbro,0000046080,sp500,0,,
+DOC,Healthpeak Properties,0000765880,sp500,0,,
 HSIC,Henry Schein,0001000228,sp500,0,,
-HST,Host Hotels & Resorts,0001070750,sp500,0,,
 HSY,Hershey Company (The),0000047111,sp500,0,,
+HPE,Hewlett Packard Enterprise,0001645590,sp500,0,,
+HLT,Hilton Worldwide,0001585689,sp500,0,,
+HD,Home Depot (The),0000354950,sp500,0,,
+HON,Honeywell,0000773840,sp500,0,,
+HRL,Hormel Foods,0000048465,sp500,0,,
+HST,Host Hotels & Resorts,0001070750,sp500,0,,
+HWM,Howmet Aerospace,0000004281,sp500,0,,
 HUBB,Hubbell Incorporated,0000048898,sp500,0,,
 HUM,Humana,0000049071,sp500,0,,
-HWM,Howmet Aerospace,0000004281,sp500,0,,
-IBKR,Interactive Brokers,0001381197,sp500,0,,
+HBAN,Huntington Bancshares,0000049196,sp500,0,,
+HII,Huntington Ingalls Industries,0001501585,sp500,0,,
 IBM,IBM,0000051143,sp500,0,,
-ICE,Intercontinental Exchange,0001571949,sp500,0,,
-IDXX,Idexx Laboratories,0000874716,sp500,0,,
 IEX,IDEX Corporation,0000832101,sp500,0,,
-IFF,International Flavors & Fragrances,0000051253,sp500,0,,
-INCY,Incyte,0000879169,sp500,0,,
-INTC,Intel,0000050863,sp500,0,,
-INTU,Intuit,0000896878,sp500,0,,
-INVH,Invitation Homes,0001687229,sp500,0,,
-IP,International Paper,0000051434,sp500,0,,
 IQV,IQVIA,0001478242,sp500,0,,
-IR,Ingersoll Rand,0001699150,sp500,0,,
-IRM,Iron Mountain,0001020569,sp500,0,,
-ISRG,Intuitive Surgical,0001035267,sp500,0,,
-IT,Gartner,0000749251,sp500,0,,
+IDXX,Idexx Laboratories,0000874716,sp500,0,,
 ITW,Illinois Tool Works,0000049826,sp500,0,,
+INCY,Incyte,0000879169,sp500,0,,
+IR,Ingersoll Rand,0001699150,sp500,0,,
+PODD,Insulet Corporation,0001145197,sp500,0,,
+INTC,Intel,0000050863,sp500,0,,
+IBKR,Interactive Brokers,0001381197,sp500,0,,
+ICE,Intercontinental Exchange,0001571949,sp500,0,,
+IFF,International Flavors & Fragrances,0000051253,sp500,0,,
+IP,International Paper,0000051434,sp500,0,,
+INTU,Intuit,0000896878,sp500,0,,
+ISRG,Intuitive Surgical,0001035267,sp500,0,,
 IVZ,Invesco,0000914208,sp500,0,,
-J,Jacobs Solutions,0000052988,sp500,0,,
+INVH,Invitation Homes,0001687229,sp500,0,,
+IRM,Iron Mountain,0001020569,sp500,0,,
 JBHT,J.B. Hunt,0000728535,sp500,0,,
+SJM,J.M. Smucker Company (The),0000091419,sp500,0,,
+JPM,JPMorgan Chase,0000019617,sp500,0,,
 JBL,Jabil,0000898293,sp500,0,,
-JCI,Johnson Controls,0000833444,sp500,0,,
 JKHY,Jack Henry & Associates,0000779152,sp500,0,,
+J,Jacobs Solutions,0000052988,sp500,0,,
 JNJ,Johnson & Johnson,0000200406,sp500,0,,
+JCI,Johnson Controls,0000833444,sp500,0,,
+KKR,KKR & Co.,0001404912,sp500,0,,
+KLAC,KLA Corporation,0000319201,sp500,0,,
+KVUE,Kenvue,0001944048,sp500,0,,
 KDP,Keurig Dr Pepper,0001418135,sp500,0,,
 KEY,KeyCorp,0000091576,sp500,0,,
 KEYS,Keysight Technologies,0001601046,sp500,0,,
-KHC,Kraft Heinz,0001637459,sp500,0,,
-KIM,Kimco Realty,0000879101,sp500,0,,
-KKR,KKR & Co.,0001404912,sp500,0,,
-KLAC,KLA Corporation,0000319201,sp500,0,,
 KMB,Kimberly-Clark,0000055785,sp500,0,,
+KIM,Kimco Realty,0000879101,sp500,0,,
 KMI,Kinder Morgan,0001506307,sp500,0,,
-KO,Coca-Cola Company (The),0000021344,sp500,0,,
+KHC,Kraft Heinz,0001637459,sp500,0,,
 KR,Kroger,0000056873,sp500,0,,
-KVUE,Kenvue,0001944048,sp500,0,,
-L,Loews Corporation,0000060086,sp500,0,,
+LHX,L3Harris,0000202058,sp500,0,,
+LH,Labcorp,0000920148,sp500,0,,
+LRCX,Lam Research,0000707549,sp500,0,,
+LVS,Las Vegas Sands,0001300514,sp500,0,,
 LDOS,Leidos,0001336920,sp500,0,,
 LEN,Lennar,0000920760,sp500,0,,
-LH,Labcorp,0000920148,sp500,0,,
-LHX,L3Harris,0000202058,sp500,0,,
 LII,Lennox International,0001069202,sp500,0,,
-LIN,Linde plc,0001707925,sp500,0,,
-LITE,Lumentum,0001633978,sp500,0,,
 LLY,Lilly (Eli),0000059478,sp500,0,,
-LMT,Lockheed Martin,0000936468,sp500,0,,
-LNT,Alliant Energy,0000352541,sp500,0,,
-LOW,Lowe's,0000060667,sp500,0,,
-LRCX,Lam Research,0000707549,sp500,0,,
-LULU,Lululemon Athletica,0001397187,sp500,0,,
-LUV,Southwest Airlines,0000092380,sp500,0,,
-LVS,Las Vegas Sands,0001300514,sp500,0,,
-LYB,LyondellBasell,0001489393,sp500,0,,
+LIN,Linde plc,0001707925,sp500,0,,
 LYV,Live Nation Entertainment,0001335258,sp500,0,,
-MA,Mastercard,0001141391,sp500,0,,
-MAA,Mid-America Apartment Communities,0000912595,sp500,0,,
+LMT,Lockheed Martin,0000936468,sp500,0,,
+L,Loews Corporation,0000060086,sp500,0,,
+LOW,Lowe's,0000060667,sp500,0,,
+LULU,Lululemon Athletica,0001397187,sp500,0,,
+LITE,Lumentum,0001633978,sp500,0,,
+LYB,LyondellBasell,0001489393,sp500,0,,
+MTB,M&T Bank,0000036270,sp500,0,,
+MGM,MGM Resorts,0000789570,sp500,0,,
+MSCI,MSCI Inc.,0001408198,sp500,0,,
+MPC,Marathon Petroleum,0001510295,sp500,0,,
 MAR,Marriott International,0001048286,sp500,0,,
+MRSH,Marsh McLennan,0000062709,sp500,0,,
+MLM,Martin Marietta Materials,0000916076,sp500,0,,
 MAS,Masco,0000062996,sp500,0,,
+MA,Mastercard,0001141391,sp500,0,,
+MKC,McCormick & Company,0000063754,sp500,0,,
 MCD,McDonald's,0000063908,sp500,0,,
-MCHP,Microchip Technology,0000827054,sp500,0,,
 MCK,McKesson Corporation,0000927653,sp500,0,,
-MCO,Moody's Corporation,0001059556,sp500,0,,
-MDLZ,Mondelez International,0001103982,sp500,0,,
 MDT,Medtronic,0001613103,sp500,0,,
+MRK,Merck & Co.,0000310158,sp500,0,,
 MET,MetLife,0001099219,sp500,0,,
 META,Meta Platforms,0001326801,sp500,0,,
-MGM,MGM Resorts,0000789570,sp500,0,,
-MKC,McCormick & Company,0000063754,sp500,0,,
-MLM,Martin Marietta Materials,0000916076,sp500,0,,
-MMM,3M,0000066740,sp500,0,,
-MNST,Monster Beverage,0000865752,sp500,0,,
-MO,Altria,0000764180,sp500,0,,
-MOS,Mosaic Company (The),0001285785,sp500,0,,
-MPC,Marathon Petroleum,0001510295,sp500,0,,
-MPWR,Monolithic Power Systems,0001280452,sp500,0,,
-MRK,Merck & Co.,0000310158,sp500,0,,
-MRNA,Moderna,0001682852,sp500,0,,
-MRSH,Marsh McLennan,0000062709,sp500,0,,
-MS,Morgan Stanley,0000895421,sp500,0,,
-MSCI,MSCI Inc.,0001408198,sp500,0,,
-MSFT,Microsoft,0000789019,sp500,0,,
-MSI,Motorola Solutions,0000068505,sp500,0,,
-MTB,M&T Bank,0000036270,sp500,0,,
 MTD,Mettler Toledo,0001037646,sp500,0,,
+MCHP,Microchip Technology,0000827054,sp500,0,,
 MU,Micron Technology,0000723125,sp500,0,,
-NCLH,Norwegian Cruise Line Holdings,0001513761,sp500,0,,
+MSFT,Microsoft,0000789019,sp500,0,,
+MAA,Mid-America Apartment Communities,0000912595,sp500,0,,
+MRNA,Moderna,0001682852,sp500,0,,
+TAP,Molson Coors Beverage Company,0000024545,sp500,0,,
+MDLZ,Mondelez International,0001103982,sp500,0,,
+MPWR,Monolithic Power Systems,0001280452,sp500,0,,
+MNST,Monster Beverage,0000865752,sp500,0,,
+MCO,Moody's Corporation,0001059556,sp500,0,,
+MS,Morgan Stanley,0000895421,sp500,0,,
+MOS,Mosaic Company (The),0001285785,sp500,0,,
+MSI,Motorola Solutions,0000068505,sp500,0,,
+NRG,NRG Energy,0001013871,sp500,0,,
+NVR,"NVR, Inc.",0000906163,sp500,0,,
+NXPI,NXP Semiconductors,0001413447,sp500,0,,
 NDAQ,"Nasdaq, Inc.",0001120193,sp500,0,,
-NDSN,Nordson Corporation,0000072331,sp500,0,,
-NEE,NextEra Energy,0000753308,sp500,0,,
-NEM,Newmont,0001164727,sp500,0,,
+NTAP,NetApp,0001002047,sp500,0,,
 NFLX,Netflix,0001065280,sp500,0,,
+NEM,Newmont,0001164727,sp500,0,,
+NWSA,News Corp (Class A),0001564708,sp500,0,,
+NEE,NextEra Energy,0000753308,sp500,0,,
 NI,NiSource,0001111711,sp500,0,,
 NKE,"Nike, Inc.",0000320187,sp500,0,,
-NOC,Northrop Grumman,0001133421,sp500,0,,
-NOW,ServiceNow,0001373715,sp500,0,,
-NRG,NRG Energy,0001013871,sp500,0,,
+NDSN,Nordson Corporation,0000072331,sp500,0,,
 NSC,Norfolk Southern,0000702165,sp500,0,,
-NTAP,NetApp,0001002047,sp500,0,,
 NTRS,Northern Trust,0000073124,sp500,0,,
+NOC,Northrop Grumman,0001133421,sp500,0,,
+NCLH,Norwegian Cruise Line Holdings,0001513761,sp500,0,,
 NUE,Nucor,0000073309,sp500,0,,
 NVDA,Nvidia,0001045810,sp500,0,,
-NVR,"NVR, Inc.",0000906163,sp500,0,,
-NWS,News Corp (Class B),0001564708,sp500,0,,
-NXPI,NXP Semiconductors,0001413447,sp500,0,,
-O,Realty Income,0000726728,sp500,0,,
-ODFL,Old Dominion,0000878927,sp500,0,,
-OKE,Oneok,0001039684,sp500,0,,
-OMC,Omnicom Group,0000029989,sp500,0,,
 ON,ON Semiconductor,0001097864,sp500,0,,
-ORCL,Oracle Corporation,0001341439,sp500,0,,
-ORLY,O’Reilly Automotive,0000898173,sp500,0,,
-OTIS,Otis Worldwide,0001781335,sp500,0,,
 OXY,Occidental Petroleum,0000797468,sp500,0,,
-PANW,Palo Alto Networks,0001327567,sp500,0,,
-PAYX,Paychex,0000723531,sp500,0,,
+ODFL,Old Dominion,0000878927,sp500,0,,
+OMC,Omnicom Group,0000029989,sp500,0,,
+OKE,Oneok,0001039684,sp500,0,,
+ORCL,Oracle Corporation,0001341439,sp500,0,,
+OTIS,Otis Worldwide,0001781335,sp500,0,,
+ORLY,O’Reilly Automotive,0000898173,sp500,0,,
+PNC,PNC Financial Services,0000713676,sp500,0,,
+PPG,PPG Industries,0000079879,sp500,0,,
+PPL,PPL Corporation,0000922224,sp500,0,,
+PTC,PTC Inc.,0000857005,sp500,0,,
 PCAR,Paccar,0000075362,sp500,0,,
-PEG,Public Service Enterprise Group,0000788784,sp500,0,,
+PKG,Packaging Corporation of America,0000075677,sp500,0,,
+PLTR,Palantir Technologies,0001321655,sp500,0,,
+PANW,Palo Alto Networks,0001327567,sp500,0,,
+PSKY,Paramount Skydance Corporation,0002041610,sp500,0,,
+PH,Parker Hannifin,0000076334,sp500,0,,
+PYPL,PayPal,0001633917,sp500,0,,
+PAYX,Paychex,0000723531,sp500,0,,
+PNR,Pentair,0000077360,sp500,0,,
 PEP,PepsiCo,0000077476,sp500,0,,
 PFE,Pfizer,0000078003,sp500,0,,
+PM,Philip Morris International,0001413329,sp500,0,,
+PSX,Phillips 66,0001534701,sp500,0,,
+PNW,Pinnacle West Capital,0000764622,sp500,0,,
+POOL,Pool Corporation,0000945841,sp500,0,,
 PFG,Principal Financial Group,0001126328,sp500,0,,
 PG,Procter & Gamble,0000080424,sp500,0,,
 PGR,Progressive Corporation,0000080661,sp500,0,,
-PH,Parker Hannifin,0000076334,sp500,0,,
-PHM,PulteGroup,0000822416,sp500,0,,
-PKG,Packaging Corporation of America,0000075677,sp500,0,,
 PLD,Prologis,0001045609,sp500,0,,
-PLTR,Palantir Technologies,0001321655,sp500,0,,
-PM,Philip Morris International,0001413329,sp500,0,,
-PNC,PNC Financial Services,0000713676,sp500,0,,
-PNR,Pentair,0000077360,sp500,0,,
-PNW,Pinnacle West Capital,0000764622,sp500,0,,
-PODD,Insulet Corporation,0001145197,sp500,0,,
-POOL,Pool Corporation,0000945841,sp500,0,,
-PPG,PPG Industries,0000079879,sp500,0,,
-PPL,PPL Corporation,0000922224,sp500,0,,
 PRU,Prudential Financial,0001137774,sp500,0,,
+PEG,Public Service Enterprise Group,0000788784,sp500,0,,
 PSA,Public Storage,0001393311,sp500,0,,
-PSKY,Paramount Skydance Corporation,0002041610,sp500,0,,
-PSX,Phillips 66,0001534701,sp500,0,,
-PTC,PTC Inc.,0000857005,sp500,0,,
-PWR,Quanta Services,0001050915,sp500,0,,
-PYPL,PayPal,0001633917,sp500,0,,
+PHM,PulteGroup,0000822416,sp500,0,,
 Q,Qnity Electronics,0002058873,sp500,0,,
 QCOM,Qualcomm,0000804328,sp500,0,,
-RCL,Royal Caribbean Group,0000884887,sp500,0,,
+PWR,Quanta Services,0001050915,sp500,0,,
+DGX,Quest Diagnostics,0001022079,sp500,0,,
+RTX,RTX Corporation,0000101829,sp500,0,,
+RL,Ralph Lauren Corporation,0001037038,sp500,0,,
+RJF,Raymond James Financial,0000720005,sp500,0,,
+O,Realty Income,0000726728,sp500,0,,
 REG,Regency Centers,0000910606,sp500,0,,
 REGN,Regeneron Pharmaceuticals,0000872589,sp500,0,,
 RF,Regions Financial Corporation,0001281761,sp500,0,,
-RJF,Raymond James Financial,0000720005,sp500,0,,
-RL,Ralph Lauren Corporation,0001037038,sp500,0,,
+RSG,Republic Services,0001060391,sp500,0,,
 RMD,ResMed,0000943819,sp500,0,,
+RVTY,Revvity,0000031791,sp500,0,,
+HOOD,Robinhood Markets,0001783879,sp500,0,,
 ROK,Rockwell Automation,0001024478,sp500,0,,
 ROL,"Rollins, Inc.",0000084839,sp500,0,,
 ROP,Roper Technologies,0000882835,sp500,0,,
 ROST,Ross Stores,0000745732,sp500,0,,
-RSG,Republic Services,0001060391,sp500,0,,
-RTX,RTX Corporation,0000101829,sp500,0,,
-RVTY,Revvity,0000031791,sp500,0,,
-SATS,EchoStar,0001415404,sp500,0,,
-SBAC,SBA Communications,0001034054,sp500,0,,
-SBUX,Starbucks,0000829224,sp500,0,,
-SCHW,Charles Schwab Corporation,0000316709,sp500,0,,
-SHW,Sherwin-Williams,0000089800,sp500,0,,
-SJM,J.M. Smucker Company (The),0000091419,sp500,0,,
-SLB,Schlumberger,0000087347,sp500,0,,
-SMCI,Supermicro,0001375365,sp500,0,,
-SNA,Snap-on,0000091440,sp500,0,,
-SNDK,Sandisk,0002023554,sp500,0,,
-SNPS,Synopsys,0000883241,sp500,0,,
-SO,Southern Company,0000092122,sp500,0,,
-SOLV,Solventum,0001964738,sp500,0,,
-SPG,Simon Property Group,0001063761,sp500,0,,
+RCL,Royal Caribbean Group,0000884887,sp500,0,,
 SPGI,S&P Global,0000064040,sp500,0,,
-SRE,Sempra,0001032208,sp500,0,,
-STE,Steris,0001757898,sp500,0,,
-STLD,Steel Dynamics,0001022671,sp500,0,,
-STT,State Street Corporation,0000093751,sp500,0,,
+SBAC,SBA Communications,0001034054,sp500,0,,
+CRM,Salesforce,0001108524,sp500,0,,
+SNDK,Sandisk,0002023554,sp500,0,,
+SLB,Schlumberger,0000087347,sp500,0,,
 STX,Seagate Technology,0001137789,sp500,0,,
-STZ,Constellation Brands,0000016918,sp500,0,,
-SW,Smurfit Westrock,0002005951,sp500,0,,
-SWK,Stanley Black & Decker,0000093556,sp500,0,,
+SRE,Sempra,0001032208,sp500,0,,
+NOW,ServiceNow,0001373715,sp500,0,,
+SHW,Sherwin-Williams,0000089800,sp500,0,,
+SPG,Simon Property Group,0001063761,sp500,0,,
 SWKS,Skyworks Solutions,0000004127,sp500,0,,
-SYF,Synchrony Financial,0001601712,sp500,0,,
+SW,Smurfit Westrock,0002005951,sp500,0,,
+SNA,Snap-on,0000091440,sp500,0,,
+SOLV,Solventum,0001964738,sp500,0,,
+SO,Southern Company,0000092122,sp500,0,,
+LUV,Southwest Airlines,0000092380,sp500,0,,
+SWK,Stanley Black & Decker,0000093556,sp500,0,,
+SBUX,Starbucks,0000829224,sp500,0,,
+STT,State Street Corporation,0000093751,sp500,0,,
+STLD,Steel Dynamics,0001022671,sp500,0,,
+STE,Steris,0001757898,sp500,0,,
 SYK,Stryker Corporation,0000310764,sp500,0,,
+SMCI,Supermicro,0001375365,sp500,0,,
+SYF,Synchrony Financial,0001601712,sp500,0,,
+SNPS,Synopsys,0000883241,sp500,0,,
 SYY,Sysco,0000096021,sp500,0,,
-T,AT&T,0000732717,sp500,0,,
-TAP,Molson Coors Beverage Company,0000024545,sp500,0,,
-TDG,TransDigm Group,0001260221,sp500,0,,
-TDY,Teledyne Technologies,0001094285,sp500,0,,
-TECH,Bio-Techne,0000842023,sp500,0,,
+TMUS,T-Mobile US,0001283699,sp500,0,,
+TROW,T. Rowe Price,0001113169,sp500,0,,
 TEL,TE Connectivity,0001385157,sp500,0,,
-TER,Teradyne,0000097210,sp500,0,,
-TFC,Truist Financial,0000092230,sp500,0,,
-TGT,Target Corporation,0000027419,sp500,0,,
 TJX,TJX Companies,0000109198,sp500,0,,
 TKO,TKO Group Holdings,0001973266,sp500,0,,
-TMO,Thermo Fisher Scientific,0000097745,sp500,0,,
-TMUS,T-Mobile US,0001283699,sp500,0,,
-TPL,Texas Pacific Land Corporation,0001811074,sp500,0,,
+TTWO,Take-Two Interactive,0000946581,sp500,0,,
 TPR,"Tapestry, Inc.",0001116132,sp500,0,,
 TRGP,Targa Resources,0001389170,sp500,0,,
-TRMB,Trimble Inc.,0000864749,sp500,0,,
-TROW,T. Rowe Price,0001113169,sp500,0,,
-TRV,Travelers Companies (The),0000086312,sp500,0,,
-TSCO,Tractor Supply,0000916365,sp500,0,,
+TGT,Target Corporation,0000027419,sp500,0,,
+TDY,Teledyne Technologies,0001094285,sp500,0,,
+TER,Teradyne,0000097210,sp500,0,,
 TSLA,"Tesla, Inc.",0001318605,sp500,0,,
-TSN,Tyson Foods,0000100493,sp500,0,,
-TT,Trane Technologies,0001466258,sp500,0,,
-TTD,Trade Desk (The),0001671933,sp500,0,,
-TTWO,Take-Two Interactive,0000946581,sp500,0,,
 TXN,Texas Instruments,0000097476,sp500,0,,
+TPL,Texas Pacific Land Corporation,0001811074,sp500,0,,
 TXT,Textron,0000217346,sp500,0,,
+TMO,Thermo Fisher Scientific,0000097745,sp500,0,,
+TSCO,Tractor Supply,0000916365,sp500,0,,
+TTD,Trade Desk (The),0001671933,sp500,0,,
+TT,Trane Technologies,0001466258,sp500,0,,
+TDG,TransDigm Group,0001260221,sp500,0,,
+TRV,Travelers Companies (The),0000086312,sp500,0,,
+TRMB,Trimble Inc.,0000864749,sp500,0,,
+TFC,Truist Financial,0000092230,sp500,0,,
 TYL,Tyler Technologies,0000860731,sp500,0,,
-UAL,United Airlines Holdings,0000100517,sp500,0,,
-UBER,Uber,0001543151,sp500,0,,
+TSN,Tyson Foods,0000100493,sp500,0,,
+USB,U.S. Bancorp,0000036104,sp500,0,,
 UDR,"UDR, Inc.",0000074208,sp500,0,,
-UHS,Universal Health Services,0000352915,sp500,0,,
+UBER,Uber,0001543151,sp500,0,,
 ULTA,Ulta Beauty,0001403568,sp500,0,,
-UNH,UnitedHealth Group,0000731766,sp500,0,,
 UNP,Union Pacific Corporation,0000100885,sp500,0,,
+UAL,United Airlines Holdings,0000100517,sp500,0,,
 UPS,United Parcel Service,0001090727,sp500,0,,
 URI,United Rentals,0001067701,sp500,0,,
-USB,U.S. Bancorp,0000036104,sp500,0,,
-V,Visa Inc.,0001403161,sp500,0,,
-VICI,Vici Properties,0001705696,sp500,0,,
+UNH,UnitedHealth Group,0000731766,sp500,0,,
+UHS,Universal Health Services,0000352915,sp500,0,,
 VLO,Valero Energy,0001035002,sp500,0,,
-VLTO,Veralto,0001967680,sp500,0,,
-VMC,Vulcan Materials Company,0001396009,sp500,0,,
-VRSK,Verisk Analytics,0001442145,sp500,0,,
-VRSN,Verisign,0001014473,sp500,0,,
-VRT,Vertiv,0001674101,sp500,0,,
-VRTX,Vertex Pharmaceuticals,0000875320,sp500,0,,
-VST,Vistra Corp.,0001692819,sp500,0,,
 VTR,Ventas,0000740260,sp500,0,,
-VTRS,Viatris,0001792044,sp500,0,,
+VLTO,Veralto,0001967680,sp500,0,,
+VRSN,Verisign,0001014473,sp500,0,,
+VRSK,Verisk Analytics,0001442145,sp500,0,,
 VZ,Verizon,0000732712,sp500,0,,
-WAB,Wabtec,0000943452,sp500,0,,
-WAT,Waters Corporation,0001000697,sp500,0,,
-WBD,Warner Bros. Discovery,0001437107,sp500,0,,
-WDAY,"Workday, Inc.",0001327811,sp500,0,,
-WDC,Western Digital,0000106040,sp500,0,,
-WEC,WEC Energy Group,0000783325,sp500,0,,
-WELL,Welltower,0000766704,sp500,0,,
-WFC,Wells Fargo,0000072971,sp500,0,,
-WM,Waste Management,0000823768,sp500,0,,
-WMB,Williams Companies,0000107263,sp500,0,,
-WMT,Walmart,0000104169,sp500,0,,
+VRTX,Vertex Pharmaceuticals,0000875320,sp500,0,,
+VRT,Vertiv,0001674101,sp500,0,,
+VTRS,Viatris,0001792044,sp500,0,,
+VICI,Vici Properties,0001705696,sp500,0,,
+V,Visa Inc.,0001403161,sp500,0,,
+VST,Vistra Corp.,0001692819,sp500,0,,
+VMC,Vulcan Materials Company,0001396009,sp500,0,,
 WRB,W. R. Berkley Corporation,0000011544,sp500,0,,
-WSM,"Williams-Sonoma, Inc.",0000719955,sp500,0,,
+GWW,W. W. Grainger,0000277135,sp500,0,,
+WEC,WEC Energy Group,0000783325,sp500,0,,
+WAB,Wabtec,0000943452,sp500,0,,
+WMT,Walmart,0000104169,sp500,0,,
+DIS,Walt Disney Company (The),0001744489,sp500,0,,
+WBD,Warner Bros. Discovery,0001437107,sp500,0,,
+WM,Waste Management,0000823768,sp500,0,,
+WAT,Waters Corporation,0001000697,sp500,0,,
+WFC,Wells Fargo,0000072971,sp500,0,,
+WELL,Welltower,0000766704,sp500,0,,
 WST,West Pharmaceutical Services,0000105770,sp500,0,,
-WTW,Willis Towers Watson,0001140536,sp500,0,,
+WDC,Western Digital,0000106040,sp500,0,,
 WY,Weyerhaeuser,0000106535,sp500,0,,
+WMB,Williams Companies,0000107263,sp500,0,,
+WSM,"Williams-Sonoma, Inc.",0000719955,sp500,0,,
+WTW,Willis Towers Watson,0001140536,sp500,0,,
+WDAY,"Workday, Inc.",0001327811,sp500,0,,
 WYNN,Wynn Resorts,0001174922,sp500,0,,
 XEL,Xcel Energy,0000072903,sp500,0,,
-XOM,ExxonMobil,0000034088,sp500,0,,
 XYL,Xylem Inc.,0001524472,sp500,0,,
-XYZ,"Block, Inc.",0001512673,sp500,0,,
 YUM,Yum! Brands,0001041061,sp500,0,,
-ZBH,Zimmer Biomet,0001136869,sp500,0,,
 ZBRA,Zebra Technologies,0000877212,sp500,0,,
+ZBH,Zimmer Biomet,0001136869,sp500,0,,
 ZTS,Zoetis,0001555280,sp500,0,,
+EBAY,eBay Inc.,0001065088,sp500,0,,

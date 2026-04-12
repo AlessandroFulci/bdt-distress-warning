@@ -1,0 +1,22 @@
+# BDT Financial Distress Early Warning System
+# Install with: pip install -r requirements.txt
+
+# Data ingestion
+requests==2.33.1
+minio==7.2.20
+tqdm==4.67.3
+
+# Data processing
+pandas==3.0.2
+pyarrow==23.0.1
+pyspark==4.1.1
+
+# Analytics
+duckdb==1.5.1
+
+# Dashboard
+streamlit==1.56.0
+plotly==6.7.0
+
+# Utilities
+python-dotenv==1.2.2

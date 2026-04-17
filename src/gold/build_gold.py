@@ -89,9 +89,9 @@ def download_silver_from_minio(client: Minio, silver_bucket: str, local_path: st
 
     logger.info("Downloading silver Parquet from MinIO...")
     os.makedirs(local_path, exist_ok=True)
-    objects = list(client.list_objects(silver_bucket, prefix="financials/", recursive=True))
+    objects = list(client.list_objects(silver_bucket, prefix="financial_facts/", recursive=True))  # ← era "financials/"
     for obj in objects:
-        dest = os.path.join(local_path, obj.object_name.replace("financials/", ""))
+        dest = os.path.join(local_path, obj.object_name.replace("financial_facts/", ""))  # ← era "financials/"
         os.makedirs(os.path.dirname(dest), exist_ok=True)
         client.fget_object(silver_bucket, obj.object_name, dest)
     logger.info(f"Downloaded {len(objects)} files")

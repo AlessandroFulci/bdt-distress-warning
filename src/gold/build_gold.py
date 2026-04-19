@@ -104,7 +104,7 @@ def upload_gold_to_minio(client: Minio, gold_bucket: str, local_path: str):
     parquet_files = glob.glob(f"{local_path}/**/*.parquet", recursive=True)
     logger.info(f"Uploading {len(parquet_files)} gold files to MinIO '{gold_bucket}' bucket")
     for pf in parquet_files:
-        rel = pf.replace(local_path + "/", "")
+        rel = pf.replace(local_path, "").replace("\\", "/").lstrip("/")
         client.fput_object(gold_bucket, f"distress_scores/{rel}", pf)
     logger.info(f"Done — gold data at MinIO: {gold_bucket}/distress_scores/")
 

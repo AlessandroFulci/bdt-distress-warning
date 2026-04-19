@@ -1,19 +1,33 @@
 """
 silver.build_silver
 ===================
+Silver layer – EDGAR Financial Distress Early Warning System.
+
+Reads raw company-facts JSON from the MinIO **bronze** bucket using
+PySpark (local mode — no cluster needed), extracts and standardises
+key financial line items, and writes clean Parquet (partitioned by
+fiscal_year) to the **silver** bucket.
+
+Why PySpark over pandas
+-----------------------
+* Handles the full dataset (700+ companies, 40k+ rows) in parallel
+* Spark's window functions make dedup and ranking clean and scalable
+* Parquet partitioned writes are native to Spark
+* Same code would run on a real cluster with zero changes
 
 Pipeline
 --------
-1. List every .json in the bronze bucket
-2. Download + parse each company-facts blob (tag-alias map handles
-   the many GAAP variants companies use for the same metric)
-3. Pivot → one row per (CIK, period_end)
-4. Deduplicate: same period filed twice → keep most-recently-filed values
-5. Compute derived fields: working_capital, ebit
-6. Write Hive-partitioned Parquet to silver bucket
+1. Start Spark in local mode, configured to talk to MinIO via S3A
+2. Stream bronze JSON via minio SDK (Spark reads the parsed records)
+3. Extract financial concepts via tag-alias map
+4. Explode → one row per (CIK, period, field, value)
+5. Pivot  → one row per (CIK, period)
+6. Deduplicate via Spark window: FY > Q4 > Q3 > Q2 > Q1, then latest filed
+7. Compute derived fields: working_capital, ebit
+8. Write Parquet to silver bucket, partitioned by fiscal_year
 
-Output schema
--------------
+Output schema (one row per company per reporting period)
+---------------------------------------------------------
 cik, company_name, period_end, fiscal_year, fiscal_period,
 form_type, filed_date, assets_total, assets_current,
 liabilities_total, liabilities_current, equity, retained_earnings,
@@ -22,22 +36,23 @@ cash, long_term_debt, ebit, working_capital
 
 Usage
 -----
-python -m silver.build_silver                  # env-var / default config
-python -m silver.build_silver --dry-run        # parse only, no writes
+python -m silver.build_silver --prefix edgar_company_facts/
+python -m silver.build_silver --prefix edgar_company_facts/ --dry-run
 python -m silver.build_silver --help
 
 Environment variables
 ---------------------
-MINIO_ENDPOINT    (default: localhost:9000)
-MINIO_ACCESS_KEY  (default: minioadmin)
-MINIO_SECRET_KEY  (default: minioadmin)
-MINIO_SECURE      (default: false)
+MINIO_ENDPOINT       (default: localhost:9000)
+MINIO_ACCESS_KEY     (default: minioadmin)
+MINIO_SECRET_KEY     (default: minioadmin)
+MINIO_SECURE         (default: false)
 MINIO_BRONZE_BUCKET  (default: bronze)
 MINIO_SILVER_BUCKET  (default: silver)
 BRONZE_PREFIX        (default: "")
 """
 
 from __future__ import annotations
+
 import argparse
 import io
 import json
@@ -45,21 +60,22 @@ import logging
 import os
 import sys
 from datetime import date
+from pathlib import Path
 from typing import Any, Iterator, Optional
 
 from dotenv import load_dotenv
 load_dotenv()
 
-import pandas as pd
-import pyarrow as pa
-import pyarrow.parquet as pq
 from minio import Minio
 from minio.error import S3Error
 
-
-
-from dotenv import load_dotenv
-load_dotenv()
+from pyspark.sql import SparkSession, Row
+from pyspark.sql import functions as F
+from pyspark.sql import Window
+from pyspark.sql.types import (
+    StructType, StructField,
+    LongType, StringType, DateType, DoubleType, IntegerType
+)
 
 log = logging.getLogger(__name__)
 
@@ -68,10 +84,8 @@ log = logging.getLogger(__name__)
 # Constants
 # =============================================================================
 
-# Forms we extract data from — everything else (8-K, DEF 14A, …) is skipped
 RELEVANT_FORMS: set[str] = {"10-K", "10-Q", "20-F", "40-F", "6-K"}
 
-# Final column order — must match what gold/build_gold.py expects
 OUTPUT_COLUMNS: list[str] = [
     "cik", "company_name", "period_end", "fiscal_year", "fiscal_period",
     "form_type", "filed_date",
@@ -83,10 +97,7 @@ OUTPUT_COLUMNS: list[str] = [
     "ebit", "working_capital",
 ]
 
-# Maps each canonical field → ordered list of GAAP/IFRS XBRL tags.
-# The extractor tries each alias in priority order and stops at the first hit,
-# because different companies (and the same company across years) use different
-# tags for the same concept.
+# Maps canonical field → ordered list of GAAP/IFRS XBRL tags (priority order)
 TAG_ALIASES: dict[str, list[str]] = {
     "assets_total": [
         "Assets",
@@ -149,62 +160,43 @@ TAG_ALIASES: dict[str, list[str]] = {
     ],
 }
 
+# Priority for fiscal_period dedup: lower = preferred
+PERIOD_RANK: dict[str, int] = {"FY": 0, "Q4": 1, "Q3": 2, "Q2": 3, "Q1": 4}
+
 
 # =============================================================================
-# Parsing
+# Parsing  (pure Python — runs inside Spark mapPartitions)
 # =============================================================================
 
-def _parse_date(val: Any) -> Optional[date]:
-    """Parse an ISO-8601 string → date, or return None on failure."""
+def _parse_date(val: Any) -> Optional[str]:
+    """Parse ISO date string → 'YYYY-MM-DD' string, or None."""
     if not val:
         return None
     try:
-        return date.fromisoformat(str(val))
+        date.fromisoformat(str(val))   # validate
+        return str(val)[:10]
     except (ValueError, TypeError):
         return None
 
 
-def extract_facts(cik: int, company_name: str, raw: dict) -> pd.DataFrame:
+def extract_rows_from_blob(cik: int, company_name: str, raw: dict) -> list[dict]:
     """
-    Parse one company-facts JSON blob → tidy DataFrame.
+    Parse one company-facts JSON blob → list of flat dicts.
 
-    SEC company-facts structure::
+    Each dict represents one (company, period, field, value) tuple.
+    This is the unit Spark will distribute and aggregate.
 
-        {
-          "cik": 320193,
-          "entityName": "Apple Inc.",
-          "facts": {
-            "us-gaap": {
-              "Assets": {
-                "units": {
-                  "USD": [
-                    {"end": "2022-09-24", "val": 352755000000,
-                     "fy": 2022, "fp": "FY", "form": "10-K",
-                     "filed": "2022-10-28"},
-                    ...
-                  ]
-                }
-              }
-            }
-          }
-        }
-
-    Returns an empty DataFrame if no extractable data is found.
+    Returns an empty list if no extractable data is found.
     """
     facts_root: dict = raw.get("facts", {})
-    # Merge namespaces; us-gaap takes precedence over ifrs-full
     namespaces: dict = {
         **facts_root.get("ifrs-full", {}),
         **facts_root.get("us-gaap", {}),
     }
 
     if not namespaces:
-        log.debug("CIK %s: no facts namespace — skipping", cik)
-        return pd.DataFrame()
+        return []
 
-    # ------------------------------------------------------------------
-    # 1. Collect raw (period, field, value) tuples
-    # ------------------------------------------------------------------
     rows: list[dict] = []
 
     for canonical_field, tags in TAG_ALIASES.items():
@@ -227,103 +219,30 @@ def extract_facts(cik: int, company_name: str, raw: dict) -> pd.DataFrame:
                     continue
                 fy = entry.get("fy")
                 rows.append({
-                    "cik":          cik,
-                    "company_name": company_name,
-                    "period_end":   period_end,
-                    "fiscal_year":  int(fy) if fy else period_end.year,
-                    "fiscal_period": entry.get("fp", ""),
-                    "form_type":    form,
-                    "filed_date":   _parse_date(entry.get("filed")),
-                    "field":        canonical_field,
-                    "value":        float(val),
+                    "cik":           int(cik),
+                    "company_name":  str(company_name),
+                    "period_end":    period_end,
+                    "fiscal_year":   int(period_end[:4]),
+                    "fiscal_period": str(entry.get("fp", "")),
+                    "form_type":     str(form),
+                    "filed_date":    _parse_date(entry.get("filed")) or "",
+                    "field":         canonical_field,
+                    "value":         float(val),
                 })
             if any(r["field"] == canonical_field for r in rows):
-                found = True  # found via this tag; skip lower-priority aliases
+                found = True
 
-    if not rows:
-        return pd.DataFrame()
-
-    df = pd.DataFrame(rows).sort_values("filed_date", na_position="first")
-
-    # ------------------------------------------------------------------
-    # 2. Pivot → one row per (cik, period_end, fiscal_period)
-    #    aggfunc="last" picks the most-recently-filed value per field,
-    #    but values only present in an earlier filing are still preserved
-    #    (amended filings don't re-submit every field).
-    # ------------------------------------------------------------------
-    pivot = df.pivot_table(
-        index=["cik", "company_name", "period_end", "fiscal_year", "fiscal_period"],
-        columns="field",
-        values="value",
-        aggfunc="last",
-    ).reset_index()
-    pivot.columns.name = None
-
-    # Attach form_type and filed_date from the most-recently-filed row per period
-    meta = (
-        df[["cik", "period_end", "form_type", "filed_date"]]
-        .drop_duplicates(subset=["cik", "period_end"], keep="last")
-    )
-    pivot = pivot.merge(meta, on=["cik", "period_end"], how="left")
-
-    # Ensure all canonical columns exist
-    for col in TAG_ALIASES:
-        if col not in pivot.columns:
-            pivot[col] = float("nan")
-
-    # ------------------------------------------------------------------
-    # 3. Derived fields (consumed directly by gold layer Z-score ratios)
-    # ------------------------------------------------------------------
-
-    # working_capital = current_assets - current_liabilities  (Altman X1 numerator)
-    pivot["working_capital"] = (
-        pivot["assets_current"] - pivot["liabilities_current"]
-    )
-
-    # ebit: prefer operating_income; fall back to net_income + interest_expense
-    # so Altman X3 always has a value when operating_income is missing.
-    pivot["ebit"] = pivot["operating_income"].copy()
-    missing_oi = pivot["ebit"].isna()
-    pivot.loc[missing_oi, "ebit"] = (
-        pivot.loc[missing_oi, "net_income"].fillna(0)
-        + pivot.loc[missing_oi, "interest_expense"].fillna(0)
-    )
-    # Restore NaN when both income fields were absent (avoid a spurious 0)
-    both_nan = missing_oi & pivot["net_income"].isna() & pivot["interest_expense"].isna()
-    pivot.loc[both_nan, "ebit"] = float("nan")
-
-    # ------------------------------------------------------------------
-    # 4. Enforce output column order
-    # ------------------------------------------------------------------
-    for col in OUTPUT_COLUMNS:
-        if col not in pivot.columns:
-            pivot[col] = float("nan")
-
-    # Final dedup: keep one row per (cik, period_end)
-    # Priority: FY > Q4 > Q3 > Q2 > Q1, then most recently filed
-    period_rank = {"FY": 0, "Q4": 1, "Q3": 2, "Q2": 3, "Q1": 4}
-    pivot["_period_rank"] = pivot["fiscal_period"].map(period_rank).fillna(9)
-    pivot = pivot.sort_values(
-        ["_period_rank", "filed_date"], ascending=[True, False], na_position="last"
-    )
-    pivot = pivot.drop_duplicates(subset=["cik", "period_end"], keep="first")
-    pivot = pivot.drop(columns=["_period_rank"])
-
-    return pivot[OUTPUT_COLUMNS].reset_index(drop=True)
+    return rows
 
 
 # =============================================================================
-# MinIO I/O
+# MinIO  (download bronze JSON — same as before)
 # =============================================================================
 
-def _get_client(endpoint: str, access_key: str, secret_key: str, secure: bool) -> Minio:
+def _get_minio_client(
+    endpoint: str, access_key: str, secret_key: str, secure: bool
+) -> Minio:
     return Minio(endpoint, access_key=access_key, secret_key=secret_key, secure=secure)
-
-
-def _ensure_bucket(client: Minio, bucket: str) -> None:
-    if not client.bucket_exists(bucket):
-        client.make_bucket(bucket)
-        log.info("Created bucket: %s", bucket)
 
 
 def _stream_bronze(
@@ -332,149 +251,330 @@ def _stream_bronze(
     """Yield (object_name, parsed_json) for every .json in the bronze bucket."""
     objects = client.list_objects(bucket, prefix=prefix, recursive=True)
     for obj in objects:
-        if not obj.object_name.endswith(".json") or obj.object_name.endswith(".meta.json"):
+        name = obj.object_name
+        if not name.endswith(".json") or name.endswith(".meta.json"):
             continue
         try:
-            resp = client.get_object(bucket, obj.object_name)
+            resp = client.get_object(bucket, name)
             try:
                 raw = json.loads(resp.read())
             finally:
                 resp.close()
                 resp.release_conn()
-            yield obj.object_name, raw
+            yield name, raw
         except (S3Error, json.JSONDecodeError, Exception) as exc:  # noqa: BLE001
-            log.warning("SKIP %s — %s", obj.object_name, exc)
+            log.warning("SKIP %s — %s", name, exc)
 
 
-def _upload_parquet(client: Minio, bucket: str, object_name: str, df: pd.DataFrame) -> None:
-    """Serialise df → Snappy Parquet in memory, then upload to MinIO."""
-    buf = io.BytesIO()
-    pq.write_table(pa.Table.from_pandas(df, preserve_index=False), buf, compression="snappy")
-    data = buf.getvalue()
-    client.put_object(
-        bucket, object_name,
-        data=io.BytesIO(data), length=len(data),
-        content_type="application/octet-stream",
+# =============================================================================
+# Spark session
+# =============================================================================
+
+def _build_spark(
+    endpoint: str,
+    access_key: str,
+    secret_key: str,
+    secure: bool,
+    app_name: str = "silver-layer",
+) -> SparkSession:
+    """
+    Create a Spark session in local mode configured for MinIO S3A access.
+
+    local[*] means: use all available CPU cores on this machine.
+    No cluster required — Spark runs entirely inside your Python process.
+    """
+    protocol = "https" if secure else "http"
+
+    spark = (
+        SparkSession.builder
+        .master("local[*]")
+        .appName(app_name)
+        # S3A connector settings for MinIO
+        .config("spark.hadoop.fs.s3a.endpoint",            f"{protocol}://{endpoint}")
+        .config("spark.hadoop.fs.s3a.access.key",          access_key)
+        .config("spark.hadoop.fs.s3a.secret.key",          secret_key)
+        .config("spark.hadoop.fs.s3a.path.style.access",   "true")
+        .config("spark.hadoop.fs.s3a.impl",
+                "org.apache.hadoop.fs.s3a.S3AFileSystem")
+        .config("spark.hadoop.fs.s3a.aws.credentials.provider",
+                "org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider")
+        .config("spark.hadoop.fs.s3a.buffer.dir",          "C:/tmp/s3a")
+        .config("spark.hadoop.fs.s3a.fast.upload",         "true")
+        .config("spark.hadoop.fs.s3a.fast.upload.buffer",  "array")
+        # Parquet settings
+        .config("spark.sql.parquet.compression.codec",     "snappy")
+        .config("spark.sql.sources.partitionOverwriteMode","dynamic")
+        # Reduce console noise
+        .config("spark.ui.showConsoleProgress",            "false")
+        .getOrCreate()
     )
-    log.info("Uploaded  %-60s  (%d rows, %d KB)", object_name, len(df), len(data) // 1024)
+    spark.sparkContext.setLogLevel("WARN")
+    return spark
+
+
+# =============================================================================
+# Spark schema for the raw extracted rows
+# =============================================================================
+
+RAW_SCHEMA = StructType([
+    StructField("cik",           LongType(),   nullable=False),
+    StructField("company_name",  StringType(), nullable=False),
+    StructField("period_end",    StringType(), nullable=False),
+    StructField("fiscal_year",   IntegerType(),nullable=False),
+    StructField("fiscal_period", StringType(), nullable=True),
+    StructField("form_type",     StringType(), nullable=True),
+    StructField("filed_date",    StringType(), nullable=True),
+    StructField("field",         StringType(), nullable=False),
+    StructField("value",         DoubleType(), nullable=False),
+])
 
 
 # =============================================================================
 # Pipeline
 # =============================================================================
 
-def _coerce_types(df: pd.DataFrame) -> pd.DataFrame:
-    """Enforce dtypes for clean Parquet output (no CAST() needed in gold DuckDB queries)."""
-    df = df.copy()
-    df["cik"]          = df["cik"].astype("int64")
-    df["period_end"]   = pd.to_datetime(df["period_end"])
-    df["filed_date"]   = pd.to_datetime(df["filed_date"])
-    df["fiscal_year"]  = df["fiscal_year"].astype("Int64")   # nullable int
-    df["fiscal_period"] = df["fiscal_period"].astype("string")
-    df["form_type"]    = df["form_type"].astype("string")
-    df["company_name"] = df["company_name"].astype("string")
-    float_cols = [c for c in OUTPUT_COLUMNS if c not in
-                  ("cik","company_name","period_end","fiscal_year",
-                   "fiscal_period","form_type","filed_date")]
-    for col in float_cols:
-        df[col] = pd.to_numeric(df[col], errors="coerce").astype("float64")
-    return df
-
-
 def run(
-    endpoint:      str  = os.getenv("MINIO_ENDPOINT",       "localhost:9000"),
-    access_key:    str  = os.getenv("MINIO_ACCESS_KEY",     "minioadmin"),
-    secret_key:    str  = os.getenv("MINIO_SECRET_KEY",     "minioadmin"),
-    secure:        bool = os.getenv("MINIO_SECURE",         "false") == "true",
-    bronze_bucket: str  = os.getenv("MINIO_BRONZE_BUCKET",  "bronze"),
-    silver_bucket: str  = os.getenv("MINIO_SILVER_BUCKET",  "silver"),
-    prefix:        str  = os.getenv("BRONZE_PREFIX",        ""),
+    endpoint:      str  = os.getenv("MINIO_ENDPOINT",      "localhost:9000"),
+    access_key:    str  = os.getenv("MINIO_ACCESS_KEY",    "minioadmin"),
+    secret_key:    str  = os.getenv("MINIO_SECRET_KEY",    "minioadmin"),
+    secure:        bool = os.getenv("MINIO_SECURE",        "false") == "true",
+    bronze_bucket: str  = os.getenv("MINIO_BRONZE_BUCKET", "bronze"),
+    silver_bucket: str  = os.getenv("MINIO_SILVER_BUCKET", "silver"),
+    prefix:        str  = os.getenv("BRONZE_PREFIX",       ""),
     dry_run:       bool = False,
-) -> pd.DataFrame:
+) -> None:
     """
-    Execute the full silver pipeline and return the assembled DataFrame.
+    Execute the full PySpark silver pipeline.
 
-    The DataFrame is also written to MinIO unless *dry_run* is True.
-    Returning the DataFrame lets notebooks chain directly into the gold layer
-    without a round-trip through MinIO.
+    Steps
+    -----
+    1. Download + parse all bronze JSON via minio SDK (Python)
+    2. Create a Spark DataFrame from the extracted rows
+    3. Pivot  → one row per (cik, period_end)
+    4. Dedup  → window function: prefer FY, then most recently filed
+    5. Derive → working_capital, ebit
+    6. Write  → Parquet to MinIO silver bucket via S3A
     """
     log.info("=" * 60)
-    log.info("Silver layer — start")
+    log.info("Silver layer (PySpark) — start")
     log.info("  MinIO  : %s  (secure=%s)", endpoint, secure)
     log.info("  Bronze : %s/%s", bronze_bucket, prefix or "*")
     log.info("  Silver : %s", silver_bucket)
     log.info("  Dry run: %s", dry_run)
     log.info("=" * 60)
 
-    client = _get_client(endpoint, access_key, secret_key, secure)
+    # ------------------------------------------------------------------
+    # 1. Parse bronze JSON → flat Python list (driver only)
+    # ------------------------------------------------------------------
+    minio_client = _get_minio_client(endpoint, access_key, secret_key, secure)
 
-    frames: list[pd.DataFrame] = []
+    all_rows: list[dict] = []
     n_objects = n_errors = 0
 
-    for obj_name, raw in _stream_bronze(client, bronze_bucket, prefix):
+    for obj_name, raw in _stream_bronze(minio_client, bronze_bucket, prefix):
         n_objects += 1
         cik          = raw.get("cik", 0)
         company_name = raw.get("entityName", "Unknown")
         log.info("[%4d] %s  (CIK %s, %s)", n_objects, obj_name, cik, company_name)
         try:
-            df = extract_facts(cik, company_name, raw)
+            rows = extract_rows_from_blob(cik, company_name, raw)
         except Exception as exc:  # noqa: BLE001
             log.warning("  SKIP — extraction error: %s", exc)
             n_errors += 1
             continue
-        if df.empty:
-            log.debug("  No rows extracted")
-            continue
-        log.info("  → %d rows", len(df))
-        frames.append(df)
-
-    if not frames:
-        log.error("No data extracted. Nothing to write.")
-        return pd.DataFrame(columns=OUTPUT_COLUMNS)
-
-    combined = _coerce_types(pd.concat(frames, ignore_index=True))
+        log.info("  → %d field-value entries", len(rows))
+        all_rows.extend(rows)
 
     log.info("-" * 60)
-    log.info("Objects processed : %d  (errors: %d)", n_objects, n_errors)
-    log.info("Total rows        : %d", len(combined))
-    log.info("Companies         : %d", combined["cik"].nunique())
-    log.info("Fiscal years      : %s – %s",
-             int(combined["fiscal_year"].min()), int(combined["fiscal_year"].max()))
+    log.info("Objects processed  : %d  (errors: %d)", n_objects, n_errors)
+    log.info("Raw field entries  : %d", len(all_rows))
 
+    if not all_rows:
+        log.error("No data extracted. Nothing to write.")
+        return
+
+    # ------------------------------------------------------------------
+    # 2. Create Spark session + DataFrame
+    # ------------------------------------------------------------------
+    spark = _build_spark(endpoint, access_key, secret_key, secure)
+    log.info("Spark version: %s", spark.version)
+
+    df = spark.createDataFrame(
+        [Row(**r) for r in all_rows],
+        schema=RAW_SCHEMA,
+    )
+
+    # Cast period_end and filed_date to proper date columns
+    df = (
+        df
+        .withColumn("period_end",  F.to_date("period_end",  "yyyy-MM-dd"))
+        .withColumn("filed_date",  F.to_date("filed_date",  "yyyy-MM-dd"))
+    )
+
+    # ------------------------------------------------------------------
+    # 3. Pivot → one row per (cik, period_end)
+    #    For each (cik, period_end, field) keep the most recently filed value
+    # ------------------------------------------------------------------
+    # Window: per (cik, period_end, field), latest filed_date wins
+    w_field = Window.partitionBy("cik", "period_end", "field") \
+                    .orderBy(F.col("filed_date").desc_nulls_last())
+
+    df = (
+        df
+        .withColumn("rn", F.row_number().over(w_field))
+        .filter(F.col("rn") == 1)
+        .drop("rn")
+    )
+
+    # Pivot fields into columns
+    pivot_df = (
+        df
+        .groupBy("cik", "company_name", "period_end",
+                 "fiscal_year", "fiscal_period", "form_type", "filed_date")
+        .pivot("field", list(TAG_ALIASES.keys()))
+        .agg(F.last("value", ignorenulls=True))
+    )
+
+    # Ensure all canonical columns exist
+    for col in TAG_ALIASES:
+        if col not in pivot_df.columns:
+            pivot_df = pivot_df.withColumn(col, F.lit(None).cast(DoubleType()))
+
+    # ------------------------------------------------------------------
+    # 4. Deduplicate: same (cik, period_end) → prefer FY, then latest filed
+    # ------------------------------------------------------------------
+    period_rank_map = F.create_map(
+        *[item for pair in
+          [(F.lit(k), F.lit(v)) for k, v in PERIOD_RANK.items()]
+          for item in pair]
+    )
+
+    pivot_df = pivot_df.withColumn(
+        "_period_rank",
+        F.coalesce(period_rank_map[F.col("fiscal_period")], F.lit(9))
+    )
+
+    w_dedup = (
+        Window.partitionBy("cik", "period_end")
+              .orderBy(
+                  F.col("_period_rank").asc(),
+                  F.col("filed_date").desc_nulls_last(),
+                  F.col("form_type").asc()
+              )
+    )
+
+    pivot_df = (
+        pivot_df
+        .withColumn("_rn", F.row_number().over(w_dedup))
+        .filter(F.col("_rn") == 1)
+        .drop("_rn", "_period_rank")
+    )
+
+    # ------------------------------------------------------------------
+    # 5. Derived fields
+    # ------------------------------------------------------------------
+
+    # working_capital = assets_current - liabilities_current  (Altman X1 numerator)
+    pivot_df = pivot_df.withColumn(
+        "working_capital",
+        F.col("assets_current") - F.col("liabilities_current")
+    )
+
+    # ebit: prefer operating_income; fall back to net_income + interest_expense
+    pivot_df = pivot_df.withColumn(
+        "ebit",
+        F.when(
+            F.col("operating_income").isNotNull(),
+            F.col("operating_income")
+        ).when(
+            F.col("net_income").isNotNull() | F.col("interest_expense").isNotNull(),
+            F.coalesce(F.col("net_income"), F.lit(0.0))
+            + F.coalesce(F.col("interest_expense"), F.lit(0.0))
+        ).otherwise(F.lit(None).cast(DoubleType()))
+    )
+
+    # ------------------------------------------------------------------
+    # 6. Final column selection + sort
+    # ------------------------------------------------------------------
+    pivot_df = pivot_df.select(OUTPUT_COLUMNS)
+
+    total_rows = pivot_df.count()
+    companies  = pivot_df.select("cik").distinct().count()
+    log.info("Total rows after dedup : %d", total_rows)
+    log.info("Companies              : %d", companies)
+
+    # ------------------------------------------------------------------
+    # 7. Write Parquet to silver bucket (partitioned by fiscal_year)
+    # ------------------------------------------------------------------
     if dry_run:
         log.info("[DRY RUN] Skipping MinIO write.")
+        pivot_df.show(5, truncate=False)
     else:
-        _ensure_bucket(client, silver_bucket)
-        for fy in sorted(combined["fiscal_year"].dropna().unique()):
-            partition = combined[combined["fiscal_year"] == fy].copy()
-            object_name = f"financial_facts/fiscal_year={int(fy)}/data.parquet"
-            try:
-                _upload_parquet(client, silver_bucket, object_name, partition)
-            except S3Error as exc:
-                log.error("Failed to upload %s: %s", object_name, exc)
+        # Convert to pandas and write via minio SDK
+        # Avoids S3A Windows filesystem issues entirely
+        import io
+        import pyarrow as pa
+        import pyarrow.parquet as pq
+        from minio.error import S3Error
 
-    log.info("Silver layer — complete")
+        log.info("Converting to pandas and writing via MinIO SDK...")
+
+        pandas_df = pivot_df.toPandas()
+        # Final hard dedup — sort by fiscal_year asc so earlier year wins,
+        # then drop duplicates keeping first (earliest fiscal_year per period)
+        pandas_df = pandas_df.sort_values(
+            ["cik", "period_end", "fiscal_year"], ascending=[True, True, True]
+        )
+        pandas_df = pandas_df.drop_duplicates(subset=["cik", "period_end"], keep="first")
+        log.info("Rows after final dedup: %d", len(pandas_df))
+
+        # Ensure silver bucket exists
+        if not minio_client.bucket_exists(silver_bucket):
+            minio_client.make_bucket(silver_bucket)
+            log.info("Created bucket: %s", silver_bucket)
+
+        # Write one partition per fiscal_year
+        for fy in sorted(pandas_df["fiscal_year"].dropna().unique()):
+            partition = pandas_df[pandas_df["fiscal_year"] == fy].copy()
+            object_name = f"financial_facts/fiscal_year={int(fy)}/data.parquet"
+            buf = io.BytesIO()
+            pq.write_table(
+                pa.Table.from_pandas(partition, preserve_index=False),
+                buf, compression="snappy"
+            )
+            data = buf.getvalue()
+            minio_client.put_object(
+                silver_bucket, object_name,
+                data=io.BytesIO(data), length=len(data),
+                content_type="application/octet-stream",
+            )
+            log.info("Uploaded %s  (%d rows, %d KB)",
+                     object_name, len(partition), len(data) // 1024)
+
+        log.info("Write complete.")
+
+    spark.stop()
+    log.info("Silver layer (PySpark) — complete")
     log.info("=" * 60)
-    return combined
 
 
 # =============================================================================
-# CLI  (mirrors gold/build_gold.py usage)
+# CLI
 # =============================================================================
 
 def _parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(
-        description="Silver: parse EDGAR bronze JSON → clean Parquet in MinIO silver.",
+        description="Silver layer (PySpark): parse EDGAR bronze JSON → clean Parquet.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-    p.add_argument("--endpoint",      default=os.getenv("MINIO_ENDPOINT",    "localhost:9000"))
-    p.add_argument("--access-key",    default=os.getenv("MINIO_ACCESS_KEY",  "minioadmin"))
-    p.add_argument("--secret-key",    default=os.getenv("MINIO_SECRET_KEY",  "minioadmin"))
+    p.add_argument("--endpoint",      default=os.getenv("MINIO_ENDPOINT",      "localhost:9000"))
+    p.add_argument("--access-key",    default=os.getenv("MINIO_ACCESS_KEY",    "minioadmin"))
+    p.add_argument("--secret-key",    default=os.getenv("MINIO_SECRET_KEY",    "minioadmin"))
     p.add_argument("--secure",        action="store_true",
                    default=os.getenv("MINIO_SECURE", "false").lower() == "true")
     p.add_argument("--bronze-bucket", default=os.getenv("MINIO_BRONZE_BUCKET", "bronze"))
     p.add_argument("--silver-bucket", default=os.getenv("MINIO_SILVER_BUCKET", "silver"))
-    p.add_argument("--prefix",        default=os.getenv("BRONZE_PREFIX", ""),
+    p.add_argument("--prefix",        default=os.getenv("BRONZE_PREFIX",       ""),
                    help="Object key prefix inside the bronze bucket")
     p.add_argument("--dry-run",       action="store_true",
                    help="Parse and log without writing to MinIO")
@@ -490,7 +590,7 @@ if __name__ == "__main__":
         format="%(asctime)s  %(levelname)-8s  %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
     )
-    result = run(
+    run(
         endpoint=args.endpoint,
         access_key=args.access_key,
         secret_key=args.secret_key,
@@ -500,5 +600,3 @@ if __name__ == "__main__":
         prefix=args.prefix,
         dry_run=args.dry_run,
     )
-    if result.empty:
-        sys.exit(1)

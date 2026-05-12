@@ -130,6 +130,7 @@ services:
       MINIO_GOLD_BUCKET: ${MINIO_GOLD_BUCKET:-gold}
       OLLAMA_BASE_URL: http://ollama:11434   # LLM endpoint inside Docker network
     volumes:
+      - ./src:/app/src            # live-reload code changes without rebuild
       - ./data:/app/data          # persist cache + reference data
       - ./logs:/app/logs          # persist logs
       - ./config:/app/config      # company universe CSV

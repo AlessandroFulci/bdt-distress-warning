@@ -22,11 +22,12 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-PROJECT_ROOT  = Path(__file__).resolve().parent.parent.parent
-GOLD_LOCAL    = str(PROJECT_ROOT / "data" / "cache" / "gold_distress")
-SILVER_LOCAL  = str(PROJECT_ROOT / "data" / "cache" / "silver_financials")
-TEXT_LOCAL    = str(PROJECT_ROOT / "data" / "cache" / "silver_text")
-UNIVERSE_PATH = PROJECT_ROOT / "config" / "company_universe.csv"
+PROJECT_ROOT      = Path(__file__).resolve().parent.parent.parent
+GOLD_LOCAL        = str(PROJECT_ROOT / "data" / "cache" / "gold_distress")
+SILVER_LOCAL      = str(PROJECT_ROOT / "data" / "cache" / "silver_financials")
+TEXT_LOCAL        = str(PROJECT_ROOT / "data" / "cache" / "silver_text")
+COMPOSITE_LOCAL   = str(PROJECT_ROOT / "data" / "cache" / "composite_scores")
+UNIVERSE_PATH     = PROJECT_ROOT / "config" / "company_universe.csv"
 
 # ---------------------------------------------------------------------------
 # Page config
@@ -57,6 +58,17 @@ def load_gold() -> pd.DataFrame:
 @st.cache_data
 def load_universe() -> pd.DataFrame:
     return pd.read_csv(UNIVERSE_PATH, dtype={"cik": str})
+
+
+@st.cache_data
+def load_composite() -> pd.DataFrame:
+    """Load composite distress scores from local cache."""
+    composite_file = os.path.join(COMPOSITE_LOCAL, "composite.parquet")
+    if not os.path.exists(composite_file):
+        return pd.DataFrame()
+    df = pd.read_parquet(composite_file)
+    df["period_end"] = pd.to_datetime(df["period_end"], errors="coerce")
+    return df
 
 
 @st.cache_data
@@ -115,6 +127,7 @@ def load_text_features() -> pd.DataFrame:
 
 df = load_gold()
 universe = load_universe()
+composite_df = load_composite()
 
 # ---------------------------------------------------------------------------
 # Sidebar
@@ -153,6 +166,15 @@ if text_df.empty:
     )
 else:
     st.sidebar.success(f"🤖 LLM features: {len(text_df):,} docs")
+
+# Composite score availability indicator
+if composite_df.empty:
+    st.sidebar.info(
+        "🎯 **Composite score** not yet built.\n\n"
+        "```\npython -m src.composite.build_composite\n```"
+    )
+else:
+    st.sidebar.success(f"🎯 Composite scores: {composite_df['cik'].nunique():,} companies")
 
 # Apply filters
 filtered = df[df["form_type"].isin(selected_forms)]
@@ -460,7 +482,250 @@ else:
             st.dataframe(summary_df, use_container_width=True, height=350)
 
 # ---------------------------------------------------------------------------
-# Row 6: Raw data explorer
+# Row 6: Composite Distress Score
+# ---------------------------------------------------------------------------
+st.divider()
+st.subheader("🎯 Composite Distress Score  (40% Z-Score + 40% LLM + 20% Trend)")
+
+if composite_df.empty:
+    st.info(
+        "Composite scores not yet built. Run:\n"
+        "```\ndocker compose exec app python -m src.composite.build_composite\n```",
+        icon="🎯",
+    )
+else:
+    # Apply same filters as rest of dashboard
+    comp_filtered = composite_df[composite_df["form_type"].isin(selected_forms)]
+    comp_filtered = comp_filtered[
+        (comp_filtered["period_end"].dt.year >= year_range[0]) &
+        (comp_filtered["period_end"].dt.year <= year_range[1])
+    ]
+    if show_label == "Healthy (S&P 500)":
+        comp_filtered = comp_filtered[comp_filtered["distress_label"] == 0]
+    elif show_label == "Distressed (LoPucki)":
+        comp_filtered = comp_filtered[comp_filtered["distress_label"] == 1]
+
+    # KPI strip
+    ck1, ck2, ck3, ck4, ck5 = st.columns(5)
+    comp_zone_counts = comp_filtered["composite_zone"].value_counts()
+    n_comp           = comp_filtered["cik"].nunique()
+    mean_comp        = comp_filtered["composite_score"].mean()
+    pct_comp_dist    = comp_zone_counts.get("distress", 0) / max(comp_zone_counts.sum(), 1) * 100
+    llm_used         = (comp_filtered["n_docs_analysed"] > 0).sum()
+
+    ck1.metric("Companies",          f"{n_comp:,}")
+    ck2.metric("Mean composite score", f"{mean_comp:.3f}" if pd.notna(mean_comp) else "—")
+    ck3.metric("Distress zone %",    f"{pct_comp_dist:.1f}%")
+    ck4.metric("LLM-enriched rows",  f"{int(llm_used):,}")
+    ck5.metric("Weights (Z/LLM/Trend)", "40 / 40 / 20 %")
+
+    comp_row1_l, comp_row1_r = st.columns(2)
+
+    # Composite zone pie
+    with comp_row1_l:
+        st.markdown("**Composite Zone Distribution**")
+        comp_zone_df = comp_filtered["composite_zone"].value_counts().reset_index()
+        comp_zone_df.columns = ["zone", "count"]
+        zone_color = {"distress": "#e74c3c", "grey": "#95a5a6", "safe": "#2ecc71"}
+        # Build legend labels with percentage included
+        total_comp = comp_zone_df["count"].sum()
+        comp_zone_df["label"] = comp_zone_df.apply(
+            lambda r: f"{r['zone']}  {r['count']/total_comp*100:.1f}%", axis=1
+        )
+        fig_comp_zone = px.pie(
+            comp_zone_df, names="label", values="count",
+            color="zone", color_discrete_map=zone_color,
+            hole=0.4,
+        )
+        fig_comp_zone.update_traces(
+            textposition="inside",
+            textinfo="none",
+            hovertemplate="<b>%{label}</b><extra></extra>",
+        )
+        fig_comp_zone.update_layout(
+            margin=dict(t=20, b=20, l=10, r=10),
+            legend=dict(
+                orientation="v",
+                yanchor="middle",
+                y=0.5,
+                xanchor="left",
+                x=1.02,
+                font=dict(size=13),
+            ),
+        )
+        st.plotly_chart(fig_comp_zone, use_container_width=True)
+
+    # Composite score histogram
+    with comp_row1_r:
+        st.markdown("**Composite Score Distribution**")
+        fig_comp_hist = px.histogram(
+            comp_filtered["composite_score"].dropna(),
+            nbins=60, color_discrete_sequence=["#9b59b6"],
+            labels={"value": "Composite Score (0=safe, 1=distress)", "count": "Periods"},
+        )
+        fig_comp_hist.add_vline(x=0.35, line_dash="dash", line_color="#2ecc71",
+                                annotation_text="Safe (0.35)", annotation_font_color="#2ecc71")
+        fig_comp_hist.add_vline(x=0.60, line_dash="dash", line_color="#e74c3c",
+                                annotation_text="Distress (0.60)", annotation_font_color="#e74c3c")
+        fig_comp_hist.update_layout(showlegend=False, margin=dict(t=20, b=20))
+        st.plotly_chart(fig_comp_hist, use_container_width=True)
+
+    # Composite vs Altman Z-Score scatter
+    st.markdown("**Composite Score vs Altman Z-Score — coloured by composite zone**")
+    scatter_comp = comp_filtered[
+        comp_filtered["composite_score"].notna() &
+        comp_filtered["altman_z_score"].notna()
+    ].copy()
+    if not scatter_comp.empty:
+        fig_comp_scatter = px.scatter(
+            scatter_comp,
+            x="altman_z_score", y="composite_score",
+            color="composite_zone",
+            color_discrete_map={"distress": "#e74c3c", "grey": "#f39c12", "safe": "#2ecc71"},
+            hover_data={"company_name": True, "period_end": True,
+                        "z_component": ":.3f", "llm_component": ":.3f",
+                        "trend_component": ":.3f"},
+            labels={
+                "altman_z_score":   "Altman Z-Score",
+                "composite_score":  "Composite Score",
+                "composite_zone":   "Zone",
+            },
+            opacity=0.65,
+        )
+        fig_comp_scatter.add_vline(x=1.81, line_dash="dot", line_color="#e74c3c", opacity=0.4,
+                                   annotation_text="Altman distress")
+        fig_comp_scatter.add_vline(x=2.99, line_dash="dot", line_color="#2ecc71", opacity=0.4,
+                                   annotation_text="Altman safe")
+        fig_comp_scatter.add_hline(y=0.60, line_dash="dot", line_color="#e74c3c", opacity=0.4)
+        fig_comp_scatter.add_hline(y=0.35, line_dash="dot", line_color="#2ecc71", opacity=0.4)
+        fig_comp_scatter.update_layout(margin=dict(t=10, b=10))
+        st.plotly_chart(fig_comp_scatter, use_container_width=True)
+        st.caption(
+            "Points in the upper-left quadrant (low Z-Score, high composite) are caught by LLM/trend signals "
+            "that the Z-Score alone would miss."
+        )
+
+    # Composite score over time — healthy vs distressed
+    st.markdown("**Median Composite Score Over Time — Healthy vs Distressed**")
+    comp_time = (
+        comp_filtered[comp_filtered["composite_score"].notna()]
+        .groupby(["period_end", "distress_label"])["composite_score"]
+        .median()
+        .reset_index()
+    )
+    comp_time["Company type"] = comp_time["distress_label"].map(
+        {0: "Healthy (S&P 500)", 1: "Distressed (LoPucki)"}
+    )
+    if not comp_time.empty:
+        fig_comp_time = px.line(
+            comp_time, x="period_end", y="composite_score", color="Company type",
+            color_discrete_map={
+                "Healthy (S&P 500)": "#2ecc71",
+                "Distressed (LoPucki)": "#e74c3c",
+            },
+            labels={"period_end": "Period", "composite_score": "Median Composite Score"},
+        )
+        fig_comp_time.add_hline(y=0.60, line_dash="dot", line_color="#e74c3c", opacity=0.5,
+                                annotation_text="Distress threshold")
+        fig_comp_time.add_hline(y=0.35, line_dash="dot", line_color="#2ecc71", opacity=0.5,
+                                annotation_text="Safe threshold")
+        fig_comp_time.update_layout(margin=dict(t=20, b=20))
+        st.plotly_chart(fig_comp_time, use_container_width=True)
+
+    # Component breakdown for per-company drilldown
+    st.markdown("**Per-Company Composite Score Drilldown**")
+    comp_companies = (
+        comp_filtered[comp_filtered["composite_score"].notna()]
+        .groupby("company_name")["composite_score"].count()
+        .sort_values(ascending=False)
+        .head(100)
+        .index.tolist()
+    )
+    selected_comp_companies = st.multiselect(
+        "Select companies to inspect",
+        comp_companies,
+        default=comp_companies[:3] if len(comp_companies) >= 3 else comp_companies,
+        key="comp_company_select",
+    )
+    if selected_comp_companies:
+        drilldown = comp_filtered[
+            comp_filtered["company_name"].isin(selected_comp_companies)
+        ].sort_values("period_end")
+
+        # Stacked area chart: component contributions over time (one company at a time)
+        for company in selected_comp_companies[:5]:  # cap at 5 to avoid clutter
+            co_df = drilldown[drilldown["company_name"] == company].sort_values("period_end")
+            if co_df.empty:
+                continue
+            fig_stack = go.Figure()
+            fig_stack.add_trace(go.Scatter(
+                x=co_df["period_end"], y=(co_df["z_component"] * 0.40).round(4),
+                mode="lines", stackgroup="one", name="Z-Score (40%)",
+                fillcolor="rgba(52,152,219,0.5)", line=dict(color="rgba(52,152,219,0.8)"),
+            ))
+            fig_stack.add_trace(go.Scatter(
+                x=co_df["period_end"], y=(co_df["llm_component"] * 0.40).round(4),
+                mode="lines", stackgroup="one", name="LLM (40%)",
+                fillcolor="rgba(155,89,182,0.5)", line=dict(color="rgba(155,89,182,0.8)"),
+            ))
+            fig_stack.add_trace(go.Scatter(
+                x=co_df["period_end"], y=(co_df["trend_component"] * 0.20).round(4),
+                mode="lines", stackgroup="one", name="Trend (20%)",
+                fillcolor="rgba(230,126,34,0.5)", line=dict(color="rgba(230,126,34,0.8)"),
+            ))
+            fig_stack.add_hline(y=0.60, line_dash="dot", line_color="#e74c3c", opacity=0.5)
+            fig_stack.add_hline(y=0.35, line_dash="dot", line_color="#2ecc71", opacity=0.5)
+            fig_stack.update_layout(
+                title=f"{company} — Composite Score Breakdown",
+                yaxis_range=[0, 1],
+                yaxis_title="Contribution to Composite Score",
+                xaxis_title="Period",
+                margin=dict(t=40, b=20),
+                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+            )
+            st.plotly_chart(fig_stack, use_container_width=True)
+
+    # AfterEmerging outcome table (distressed companies only)
+    if "after_emerging_class" in comp_filtered.columns:
+        distressed_comp = comp_filtered[comp_filtered.get("distress_label", 0) == 1]
+        if not distressed_comp.empty:
+            with st.expander("📋 Post-Bankruptcy Outcomes (AfterEmerging classification)"):
+                outcome_counts = distressed_comp.drop_duplicates(
+                    subset="company_name"
+                )["after_emerging_class"].value_counts().reset_index()
+                outcome_counts.columns = ["Outcome", "Companies"]
+                outcome_color = {
+                    "survived": "#2ecc71", "acquired": "#3498db",
+                    "liquidated": "#e74c3c", "refiled": "#e67e22", "unknown": "#95a5a6"
+                }
+                fig_outcome = px.bar(
+                    outcome_counts, x="Outcome", y="Companies",
+                    color="Outcome", color_discrete_map=outcome_color,
+                )
+                fig_outcome.update_layout(showlegend=False, margin=dict(t=10, b=10))
+                st.plotly_chart(fig_outcome, use_container_width=True)
+
+                outcome_detail = (
+                    distressed_comp.drop_duplicates(subset="company_name")
+                    [["company_name", "after_emerging_class", "composite_score",
+                      "z_component", "llm_component", "trend_component",
+                      "brd_disposition", "brd_after_emerging"]]
+                    .sort_values("composite_score", ascending=False)
+                    .rename(columns={
+                        "company_name":        "Company",
+                        "after_emerging_class": "Outcome class",
+                        "composite_score":      "Composite",
+                        "z_component":          "Z component",
+                        "llm_component":        "LLM component",
+                        "trend_component":      "Trend component",
+                        "brd_disposition":      "Disposition",
+                        "brd_after_emerging":   "AfterEmerging text",
+                    })
+                )
+                st.dataframe(outcome_detail, use_container_width=True, height=350)
+
+# ---------------------------------------------------------------------------
+# Row 7: Raw data explorer
 # ---------------------------------------------------------------------------
 with st.expander("🔍 Raw financial data explorer"):
     cols_to_show = [

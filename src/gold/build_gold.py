@@ -43,8 +43,8 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 LOGS_DIR = PROJECT_ROOT / "logs"
 LOGS_DIR.mkdir(exist_ok=True)
 UNIVERSE_PATH = PROJECT_ROOT / "config" / "company_universe.csv"
-SILVER_LOCAL = "/tmp/silver_financials"
-GOLD_LOCAL = "/tmp/gold_distress"
+SILVER_LOCAL = str(PROJECT_ROOT / "data" / "cache" / "silver_financials")
+GOLD_LOCAL   = str(PROJECT_ROOT / "data" / "cache" / "gold_distress")
 
 
 # ---------------------------------------------------------------------------
@@ -122,10 +122,40 @@ CREATE OR REPLACE VIEW silver AS
 CREATE OR REPLACE VIEW universe AS
     SELECT
         LPAD(CAST(cik AS VARCHAR), 10, '0') AS cik,
-        distress_label,
+        TRY_CAST(distress_label AS INTEGER) AS distress_label,
         distress_event_date,
-        distress_event_type
-    FROM read_csv_auto('{universe_path}');
+        distress_event_type,
+        -- BRD enrichment columns (NULL for healthy S&P 500 companies)
+        TRY_CAST(brd_chapter          AS INTEGER) AS brd_chapter,
+        brd_disposition,
+        TRY_CAST(brd_emerged          AS INTEGER) AS brd_emerged,
+        TRY_CAST(brd_days_in_bk       AS DOUBLE)  AS brd_days_in_bk,
+        TRY_CAST(brd_fresh_start      AS INTEGER) AS brd_fresh_start,
+        TRY_CAST(brd_refiled          AS INTEGER) AS brd_refiled,
+        TRY_CAST(brd_dip_loan         AS INTEGER) AS brd_dip_loan,
+        TRY_CAST(brd_sale_363         AS INTEGER) AS brd_sale_363,
+        TRY_CAST(brd_prepackaged      AS INTEGER) AS brd_prepackaged,
+        TRY_CAST(brd_voluntary        AS INTEGER) AS brd_voluntary,
+        TRY_CAST(brd_ceo_replaced     AS INTEGER) AS brd_ceo_replaced,
+        TRY_CAST(brd_trustee_appointed AS INTEGER) AS brd_trustee_appointed,
+        TRY_CAST(brd_assets_before_m  AS DOUBLE)  AS brd_assets_before_m,
+        TRY_CAST(brd_sales_before_m   AS DOUBLE)  AS brd_sales_before_m,
+        TRY_CAST(brd_ebit_before_m    AS DOUBLE)  AS brd_ebit_before_m,
+        brd_sic_description,
+        brd_sic_division,
+        -- Post-emergence outcome
+        brd_after_emerging,
+        brd_date_emerging,
+        TRY_CAST(brd_year_emerged          AS INTEGER) AS brd_year_emerged,
+        TRY_CAST(brd_days_emerge_to_refile AS DOUBLE)  AS brd_days_emerge_to_refile,
+        brd_name_emerging,
+        -- Post-emergence financials (USD millions)
+        TRY_CAST(brd_assets_emerging_m     AS DOUBLE)  AS brd_assets_emerging_m,
+        TRY_CAST(brd_sales_emerging_m      AS DOUBLE)  AS brd_sales_emerging_m,
+        TRY_CAST(brd_ebit_emerging_m       AS DOUBLE)  AS brd_ebit_emerging_m,
+        TRY_CAST(brd_ebitda_emerging_m     AS DOUBLE)  AS brd_ebitda_emerging_m,
+        TRY_CAST(brd_net_income_emerging_m AS DOUBLE)  AS brd_net_income_emerging_m
+    FROM read_csv_auto('{universe_path}', all_varchar=true);
 
 -- ============================================================
 -- Step 2: base table — only annual + quarterly, non-null assets
@@ -153,9 +183,39 @@ SELECT
     s.long_term_debt,
     s.ebit,
     s.working_capital,
-    COALESCE(u.distress_label, 0)        AS distress_label,
+    COALESCE(u.distress_label, 0) AS distress_label,
     u.distress_event_date,
-    u.distress_event_type
+    u.distress_event_type,
+    -- BRD enrichment (NULL for healthy companies)
+    u.brd_chapter,
+    u.brd_disposition,
+    u.brd_emerged,
+    u.brd_days_in_bk,
+    u.brd_fresh_start,
+    u.brd_refiled,
+    u.brd_dip_loan,
+    u.brd_sale_363,
+    u.brd_prepackaged,
+    u.brd_voluntary,
+    u.brd_ceo_replaced,
+    u.brd_trustee_appointed,
+    u.brd_assets_before_m,
+    u.brd_sales_before_m,
+    u.brd_ebit_before_m,
+    u.brd_sic_description,
+    u.brd_sic_division,
+    -- Post-emergence outcome
+    u.brd_after_emerging,
+    u.brd_date_emerging,
+    u.brd_year_emerged,
+    u.brd_days_emerge_to_refile,
+    u.brd_name_emerging,
+    -- Post-emergence financials
+    u.brd_assets_emerging_m,
+    u.brd_sales_emerging_m,
+    u.brd_ebit_emerging_m,
+    u.brd_ebitda_emerging_m,
+    u.brd_net_income_emerging_m
 FROM silver s
 LEFT JOIN universe u USING (cik)
 WHERE s.assets_total IS NOT NULL

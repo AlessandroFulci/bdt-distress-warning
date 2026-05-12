@@ -3,6 +3,7 @@
 
 # Data ingestion
 requests==2.33.1
+lxml==5.4.0
 minio==7.2.20
 tqdm==4.67.3
 

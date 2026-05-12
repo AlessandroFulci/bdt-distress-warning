@@ -1,1 +1,1 @@
-from .build_silver import run  # noqa: F401
+# Lazy imports — do not import PySpark at module load time

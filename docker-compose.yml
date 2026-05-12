@@ -1,0 +1,147 @@
+# ============================================================
+# BDT Financial Distress Warning System — Full Stack
+# ============================================================
+# Services:
+#   minio     — Object storage (bronze / silver / gold buckets)
+#   ollama    — Local LLM server (llama3.2:3b)
+#   app       — Streamlit dashboard + pipeline runner
+#
+# Usage:
+#   docker compose up -d          # start all services
+#   docker compose logs -f app    # follow app logs
+#   docker compose down           # stop everything
+#   docker compose down -v        # stop + delete data volumes
+# ============================================================
+
+services:
+
+  # ----------------------------------------------------------
+  # MinIO — S3-compatible object storage
+  # ----------------------------------------------------------
+  minio:
+    image: minio/minio:latest
+    container_name: bdt-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-minioadmin}
+    ports:
+      - "9000:9000"    # S3 API
+      - "9001:9001"    # Web console  →  http://localhost:9001
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  # ----------------------------------------------------------
+  # MinIO init — creates buckets on first start
+  # ----------------------------------------------------------
+  minio-init:
+    image: minio/mc:latest
+    container_name: bdt-minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+        mc alias set local http://minio:9000 ${MINIO_ACCESS_KEY:-minioadmin} ${MINIO_SECRET_KEY:-minioadmin};
+        mc mb --ignore-existing local/bronze;
+        mc mb --ignore-existing local/silver;
+        mc mb --ignore-existing local/gold;
+        echo 'Buckets ready.';
+      "
+    restart: "no"
+
+  # ----------------------------------------------------------
+  # Ollama — local LLM server
+  # ----------------------------------------------------------
+  ollama:
+    image: ollama/ollama:latest
+    container_name: bdt-ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    # GPU support (uncomment if you have NVIDIA GPU + nvidia-container-toolkit)
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+
+  # ----------------------------------------------------------
+  # Ollama init — pulls the model on first start
+  # ----------------------------------------------------------
+  ollama-init:
+    image: ollama/ollama:latest
+    container_name: bdt-ollama-init
+    depends_on:
+      ollama:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+        echo 'Pulling model ${OLLAMA_MODEL:-llama3.2:3b}...';
+        OLLAMA_HOST=http://ollama:11434 ollama pull ${OLLAMA_MODEL:-llama3.2:3b};
+        echo 'Model ready.';
+      "
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: "no"
+
+  # ----------------------------------------------------------
+  # Streamlit dashboard
+  # ----------------------------------------------------------
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bdt-app
+    restart: unless-stopped
+    depends_on:
+      minio:
+        condition: service_healthy
+      ollama:
+        condition: service_healthy
+    ports:
+      - "8501:8501"    # Dashboard  →  http://localhost:8501
+    environment:
+      SEC_USER_AGENT: ${SEC_USER_AGENT}
+      MINIO_ENDPOINT: minio:9000         # use container hostname, not localhost
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
+      MINIO_SECURE: "false"
+      MINIO_BRONZE_BUCKET: ${MINIO_BRONZE_BUCKET:-bronze}
+      MINIO_SILVER_BUCKET: ${MINIO_SILVER_BUCKET:-silver}
+      MINIO_GOLD_BUCKET: ${MINIO_GOLD_BUCKET:-gold}
+      OLLAMA_BASE_URL: http://ollama:11434   # LLM endpoint inside Docker network
+    volumes:
+      - ./data:/app/data          # persist cache + reference data
+      - ./logs:/app/logs          # persist logs
+      - ./config:/app/config      # company universe CSV
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+volumes:
+  minio_data:
+    driver: local
+  ollama_data:
+    driver: local

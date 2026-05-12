@@ -1,15 +1,15 @@
 # BDT Financial Distress Early Warning System
 
-A big data pipeline that ingests SEC 10-K filings, computes Altman Z-Scores, runs LLM analysis on filing text, and visualises financial distress signals in an interactive Streamlit dashboard.
+A big data pipeline that ingests SEC 10-K filings, computes Altman Z-Scores, runs LLM analysis on filing text, and visualises financial distress signals — including a **composite distress score** combining quantitative + qualitative signals — in an interactive Streamlit dashboard.
 
 ---
 
 ## Architecture
 
 ```
-SEC EDGAR ──► Bronze (MinIO) ──► Silver (Parquet) ──► Gold (DuckDB) ──► Dashboard
-                 raw text         keyword + LLM         Z-Scores         Streamlit
-                                    features            distress zones
+SEC EDGAR ──► Bronze (MinIO) ──► Silver (Parquet) ──► Gold (DuckDB) ──► Composite ──► Dashboard
+                 raw text         keyword + LLM         Z-Scores         40/40/20      Streamlit
+                                    features            distress zones    score
 ```
 
 | Layer | Contents | Storage |
@@ -17,6 +17,7 @@ SEC EDGAR ──► Bronze (MinIO) ──► Silver (Parquet) ──► Gold (Du
 | Bronze | Raw 10-K filing text — MD&A, Risk Factors, Business Description | MinIO `bronze` bucket |
 | Silver | Keyword features + LLM sentiment, risk signals, going-concern flags | MinIO `silver` + `data/cache/silver_text/` |
 | Gold | Altman Z-Score, distress zones, QoQ growth trends, BRD enrichment | MinIO `gold` + `data/cache/gold_distress/` |
+| Composite | Unified distress score: 40% Z-Score + 40% LLM + 20% Trend | `data/cache/composite_scores/` |
 
 ---
 
@@ -86,11 +87,26 @@ docker compose exec app python -m src.silver.build_silver_text \
 
 # Build gold layer (Altman Z-Score, distress zones, BRD enrichment)
 docker compose exec app python -m src.gold.build_gold
+
+# Build composite distress score (40% Z-Score + 40% LLM + 20% Trend)
+docker compose exec app python -m src.composite.build_composite
 ```
 
 ### 5. Open the dashboard
 
 **http://localhost:8501**
+
+### 6. Share the dashboard (optional)
+
+To share with someone on a **different network**, use ngrok:
+
+```bash
+brew install ngrok
+ngrok config add-authtoken YOUR_TOKEN   # one-time setup — get token at ngrok.com
+ngrok http 8501
+```
+
+Send the `https://xxxx.ngrok-free.app` URL shown in the terminal to your friend. Keep the terminal open while they're viewing it.
 
 ---
 
@@ -110,6 +126,7 @@ All processed data survives `docker compose down` and restarts. **Just run `dock
 
 | Data | Location | Survives restart | Survives `down -v` |
 |------|----------|-----------------|-------------------|
+| Composite scores | `data/cache/composite_scores/` | ✅ | ✅ |
 | Gold Parquet | `data/cache/gold_distress/` | ✅ | ✅ |
 | Silver text (LLM features) | `data/cache/silver_text/` | ✅ | ✅ |
 | Bronze 10-K text | MinIO `minio_data` volume | ✅ | ❌ |
@@ -135,6 +152,7 @@ bdt-distress-warning/
 │   └── company_universe.csv        # 736 companies: S&P 500 + LoPucki bankruptcies
 ├── data/
 │   ├── cache/                      # Auto-generated Parquet cache (gitignored)
+│   │   ├── composite_scores/       # Composite distress score (40/40/20)
 │   │   ├── gold_distress/          # Gold layer partitioned by distress_label
 │   │   ├── silver_financials/      # Silver financial facts
 │   │   └── silver_text/            # LLM text features (resumable)
@@ -149,6 +167,8 @@ bdt-distress-warning/
 │   │   └── build_silver_text.py    # LLM pipeline: bronze text → NLP features
 │   ├── gold/
 │   │   └── build_gold.py           # Altman Z-Score + distress zones via DuckDB
+│   ├── composite/
+│   │   └── build_composite.py      # Composite score: Z-Score + LLM + Trend
 │   └── dashboard/
 │       └── app.py                  # Streamlit dashboard
 ├── run_pipeline.py                 # Smart orchestrator (checks cache freshness)
@@ -190,6 +210,34 @@ docker compose exec app python -m src.silver.build_silver_text \
 
 ---
 
+## Composite Distress Score
+
+The composite score combines three independent signal sources into a single unified distress indicator per company per period.
+
+| Component | Weight | Source | What it measures |
+|-----------|--------|--------|-----------------|
+| **Z-Score** | 40% | Gold layer | Balance sheet health (Altman Z-Score normalised to 0–1) |
+| **LLM text** | 40% | Silver text | Management tone, risk language, going-concern flags |
+| **Trend** | 20% | Gold layer | 3-quarter revenue/income decline flags + QoQ growth drops |
+
+**Score range:** 0 = no distress signal, 1 = maximum distress signal
+
+| Zone | Score | Interpretation |
+|------|-------|---------------|
+| 🔴 Distress | > 0.60 | Strong multi-signal warning |
+| 🟡 Grey | 0.35 – 0.60 | Monitor closely |
+| 🟢 Safe | < 0.35 | Low distress signal |
+
+The LLM component falls back to 0.50 (neutral) for companies with no text data processed yet — so the composite score works even before running the full LLM pipeline.
+
+**AfterEmerging classification** — for LoPucki distressed companies, the free-text `AfterEmerging` field is automatically classified into: `survived`, `acquired`, `liquidated`, `refiled`, or `unknown` using rule-based keyword matching.
+
+```bash
+docker compose exec app python -m src.composite.build_composite
+```
+
+---
+
 ## Pipeline Reference
 
 ### Individual steps
@@ -211,15 +259,19 @@ docker compose exec app python -m src.silver.build_silver_text \
 
 # Gold layer
 docker compose exec app python -m src.gold.build_gold
+
+# Composite distress score
+docker compose exec app python -m src.composite.build_composite
 ```
 
 ### Smart orchestrator
 
 ```bash
-docker compose exec app python run_pipeline.py --status   # check what's stale
-docker compose exec app python run_pipeline.py            # run only stale layers
-docker compose exec app python run_pipeline.py --force    # rebuild everything
+docker compose exec app python run_pipeline.py --status        # check what's stale
+docker compose exec app python run_pipeline.py                 # run only stale layers
+docker compose exec app python run_pipeline.py --force         # rebuild everything
 docker compose exec app python run_pipeline.py --step gold
+docker compose exec app python run_pipeline.py --step composite
 ```
 
 ---
@@ -230,6 +282,7 @@ docker compose exec app python run_pipeline.py --step gold
 |---------|-------------|
 | **Pipeline Overview** | Row counts, zone distribution, data freshness |
 | **Altman Z-Score** | Distribution, per-company timeline, distress zones |
+| **Composite Score** | Unified 40/40/20 score — zone pie, histogram, scatter vs Z-Score, per-company stacked breakdown, AfterEmerging outcomes |
 | **Trend Analysis** | QoQ revenue/income growth, 3-quarter decline flags |
 | **LLM Text Analysis** | Sentiment scores by section, risk levels, going-concern signals |
 

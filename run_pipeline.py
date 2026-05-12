@@ -20,6 +20,7 @@ Steps (in order)
   silver      build_silver.py      — bronze JSON → silver Parquet
   gold        build_gold.py        — silver Parquet → gold Z-scores
   silver_text build_silver_text.py — bronze text → LLM NLP features      (optional)
+  composite   build_composite.py   — Z-Score + LLM + Trend → composite score
 """
 
 from __future__ import annotations
@@ -38,9 +39,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 PROJECT_ROOT = Path(__file__).resolve().parent
-CACHE_DIR    = PROJECT_ROOT / "data" / "cache"
-GOLD_LOCAL   = CACHE_DIR / "gold_distress"
-SILVER_LOCAL = CACHE_DIR / "silver_financials"
+CACHE_DIR        = PROJECT_ROOT / "data" / "cache"
+GOLD_LOCAL       = CACHE_DIR / "gold_distress"
+SILVER_LOCAL     = CACHE_DIR / "silver_financials"
+COMPOSITE_LOCAL  = CACHE_DIR / "composite_scores"
 LOGS_DIR     = PROJECT_ROOT / "logs"
 LOGS_DIR.mkdir(exist_ok=True)
 CACHE_DIR.mkdir(parents=True, exist_ok=True)
@@ -72,6 +74,15 @@ def _newest_mtime(files: list[Path]) -> float | None:
 
 def _age_days(mtime: float) -> float:
     return (datetime.now().timestamp() - mtime) / 86400
+
+
+def composite_is_fresh() -> bool:
+    f = COMPOSITE_LOCAL / "composite.parquet"
+    if not f.exists():
+        return False
+    age = _age_days(f.stat().st_mtime)
+    log.info("Composite cache: %.1f days old", age)
+    return age < CACHE_MAX_AGE_DAYS
 
 
 def gold_is_fresh() -> bool:
@@ -187,6 +198,15 @@ def print_status():
     else:
         print(f"  Gold (cache)     : ❌ {GOLD_LOCAL}")
 
+    # Composite (local)
+    cf = COMPOSITE_LOCAL / "composite.parquet"
+    if cf.exists():
+        age = _age_days(cf.stat().st_mtime)
+        fresh = age < CACHE_MAX_AGE_DAYS
+        print(f"  Composite score  : ✅ {age:.1f}d old {'(fresh)' if fresh else '(STALE)'}")
+    else:
+        print(f"  Composite score  : ❌ not built — run --step composite")
+
     print("=" * 55)
     if gf:
         print("  ✅ Dashboard is ready:  streamlit run src/dashboard/app.py")
@@ -218,7 +238,7 @@ Examples:
     parser.add_argument("--dashboard",  action="store_true",  help="Launch Streamlit after pipeline")
     parser.add_argument("--no-bronze",  action="store_true",  help="Skip bronze ingestion entirely")
     parser.add_argument("--with-text",  action="store_true",  help="Also run bronze_text + silver_text (LLM)")
-    parser.add_argument("--step",       choices=["bronze", "bronze_text", "silver", "gold", "silver_text"],
+    parser.add_argument("--step",       choices=["bronze", "bronze_text", "silver", "gold", "silver_text", "composite"],
                         help="Run only this one step")
     args = parser.parse_args()
 
@@ -238,6 +258,7 @@ Examples:
             "silver":      ("src.silver.build_silver",         []),
             "gold":        ("src.gold.build_gold",             []),
             "silver_text": ("src.silver.build_silver_text",    []),
+            "composite":   ("src.composite.build_composite",   []),
         }
         module, extra = step_map[args.step]
         ok = run_step(module, extra)
@@ -282,8 +303,15 @@ Examples:
 
     # STEP 4: Silver text / LLM (optional)
     if args.with_text:
-        log.info("--- Step 4/4: Silver text (LLM) ---")
+        log.info("--- Step 4/5: Silver text (LLM) ---")
         success = run_step("src.silver.build_silver_text") and success
+
+    # STEP 5: Composite score
+    if args.force or not composite_is_fresh():
+        log.info("--- Step 5/5: Composite distress score ---")
+        success = run_step("src.composite.build_composite") and success
+    else:
+        log.info("--- Step 5/5: Composite ✅ cache fresh — skipping ---")
 
     # --- Summary ---
     log.info("=" * 55)

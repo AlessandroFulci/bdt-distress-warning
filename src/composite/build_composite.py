@@ -5,15 +5,15 @@ Builds a unified composite distress score by combining three signal sources:
 
   Component          Weight  Source
   ─────────────────────────────────────────────────────────────
-  Z-Score            40 %    Gold layer  (Altman Z-Score)
-  LLM text signals   40 %    Silver text (sentiment, risk, flags)
+  Z-Score            60 %    Gold layer  (Altman Z'-Score)
+  LLM text signals   20 %    Silver text (sentiment, risk, flags)
   Trend signals      20 %    Gold layer  (QoQ growth, decline flags)
 
 All three components are normalised to [0, 1] where:
   0 = no distress signal    1 = maximum distress signal
 
-Final composite_score = 0.40 * z_component
-                      + 0.40 * llm_component   (0.50 neutral when missing)
+Final composite_score = 0.60 * z_component
+                      + 0.20 * llm_component   (0.50 neutral when missing)
                       + 0.20 * trend_component
 
 Composite zones (mirroring Altman's intuition scaled to 0-1):
@@ -59,8 +59,8 @@ LOGS_DIR        = PROJECT_ROOT / "logs"
 LOGS_DIR.mkdir(exist_ok=True)
 
 # Composite weights
-W_ZSCORE = 0.40
-W_LLM    = 0.40
+W_ZSCORE = 0.60
+W_LLM    = 0.20
 W_TREND  = 0.20
 
 # Composite zone thresholds

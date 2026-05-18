@@ -4,18 +4,26 @@ Gold layer: compute financial distress indicators from the silver Parquet table.
 Uses DuckDB for fast in-process SQL analytics — no JVM, no cluster needed.
 
 Outputs per (company, period):
-  Altman Z-Score
+  Altman Z'-Score (private-firm variant)
     X1 = working_capital / assets_total
     X2 = retained_earnings / assets_total
     X3 = ebit / assets_total
-    X4 = equity / liabilities_total          (book value proxy for market cap)
+    X4 = equity (book value) / liabilities_total
     X5 = revenue / assets_total
-    Z  = 1.2*X1 + 1.4*X2 + 3.3*X3 + 0.6*X4 + 1.0*X5
+    Z' = 0.717*X1 + 0.847*X2 + 3.107*X3 + 0.420*X4 + 0.998*X5
+    Z' is winsorised to [-20, 20] to absorb XBRL data artifacts.
+
+  The Z'-Score is used instead of the original 1968 Z-Score because SEC
+  XBRL company facts provide the BOOK value of equity, not market
+  capitalisation. Z' is Altman's own re-estimation of the model with
+  coefficients and thresholds calibrated to book equity, so plugging
+  book equity into it is consistent (the original 0.6*X4 term and the
+  1.81/2.99 thresholds were calibrated for MARKET value of equity).
 
   Distress zone
-    Z < 1.81            → distress
-    1.81 <= Z <= 2.99   → grey
-    Z > 2.99            → safe
+    Z' < 1.23           → distress
+    1.23 <= Z' <= 2.90  → grey
+    Z' > 2.90           → safe
 
   Quarter-over-quarter trend features (via LAG window functions)
     revenue_growth, net_income_growth, asset_growth, equity_growth
@@ -234,20 +242,29 @@ SELECT
     CASE WHEN liabilities_total > 0 THEN equity       / liabilities_total ELSE NULL END AS x4_equity_to_liab,
     CASE WHEN assets_total > 0 THEN revenue           / assets_total ELSE NULL END AS x5_rev_to_assets,
 
-    -- Z-Score
+    -- Z-Score  (annual filings only — see module docstring)
     CASE
-        WHEN assets_total > 0 AND liabilities_total > 0
+        WHEN fiscal_period = 'FY'
+             AND assets_total > 0 AND liabilities_total > 0
              AND working_capital IS NOT NULL
              AND retained_earnings IS NOT NULL
              AND ebit IS NOT NULL
              AND equity IS NOT NULL
              AND revenue IS NOT NULL
         THEN
-            1.2 * (working_capital   / assets_total)
-          + 1.4 * (retained_earnings / assets_total)
-          + 3.3 * (ebit              / assets_total)
-          + 0.6 * (equity            / liabilities_total)
-          + 1.0 * (revenue           / assets_total)
+            -- Winsorise to [-20, 20]. A few company-periods have
+            -- implausibly small balance-sheet denominators (XBRL tagging
+            -- artifacts: wrong scale, sub-entity CIKs, partial filings),
+            -- which blow up the ratios. A real firm's Altman Z' never
+            -- approaches these magnitudes, so clipping removes the
+            -- artifacts without dropping rows or shifting zone labels.
+            GREATEST(-20.0, LEAST(20.0,
+                0.717 * (working_capital   / assets_total)
+              + 0.847 * (retained_earnings / assets_total)
+              + 3.107 * (ebit              / assets_total)
+              + 0.420 * (equity            / liabilities_total)
+              + 0.998 * (revenue           / assets_total)
+            ))
         ELSE NULL
     END AS altman_z_score
 FROM base;
@@ -262,8 +279,8 @@ SELECT
     -- Distress zone
     CASE
         WHEN altman_z_score IS NULL   THEN NULL
-        WHEN altman_z_score < 1.81    THEN 'distress'
-        WHEN altman_z_score <= 2.99   THEN 'grey'
+        WHEN altman_z_score < 1.23    THEN 'distress'
+        WHEN altman_z_score <= 2.90   THEN 'grey'
         ELSE                               'safe'
     END AS distress_zone,
 

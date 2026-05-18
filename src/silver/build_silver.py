@@ -350,8 +350,8 @@ def run(
     -----
     1. Download + parse all bronze JSON via minio SDK (Python)
     2. Create a Spark DataFrame from the extracted rows
-    3. Pivot  → one row per (cik, period_end)
-    4. Dedup  → window function: prefer FY, then most recently filed
+    3. Pivot  → one row per (cik, period_end)  — group by cik+period_end ONLY
+    4. Meta   → attach one representative metadata record per (cik, period_end)
     5. Derive → working_capital, ebit
     6. Write  → Parquet to MinIO silver bucket via S3A
     """
@@ -412,10 +412,10 @@ def run(
     )
 
     # ------------------------------------------------------------------
-    # 3. Pivot → one row per (cik, period_end)
-    #    For each (cik, period_end, field) keep the most recently filed value
+    # 3. Pivot → exactly one row per (cik, period_end)
     # ------------------------------------------------------------------
-    # Window: per (cik, period_end, field), latest filed_date wins
+    # 3a. For each (cik, period_end, field) keep the most recently filed
+    #     value.  This handles restatements: the latest filing wins.
     w_field = Window.partitionBy("cik", "period_end", "field") \
                     .orderBy(F.col("filed_date").desc_nulls_last())
 
@@ -426,11 +426,19 @@ def run(
         .drop("rn")
     )
 
-    # Pivot fields into columns
+    # 3b. Pivot the financial facts into columns.
+    #     CRITICAL: group ONLY by (cik, period_end).
+    #     fiscal_period / form_type / filed_date are PER-FACT properties,
+    #     NOT per-period: a balance-sheet fact and an income fact for the
+    #     same period are routinely re-reported across different filings,
+    #     so they carry different filed_date / form_type values.  Putting
+    #     those columns in the groupBy splits one company-period into many
+    #     fragment rows, each holding only a subset of the fields — which
+    #     then collapses to a single near-empty row in the dedup step and
+    #     starves the Z-Score of balance-sheet inputs.
     pivot_df = (
         df
-        .groupBy("cik", "company_name", "period_end",
-                 "fiscal_year", "fiscal_period", "form_type", "filed_date")
+        .groupBy("cik", "period_end")
         .pivot("field", list(TAG_ALIASES.keys()))
         .agg(F.last("value", ignorenulls=True))
     )
@@ -441,7 +449,12 @@ def run(
             pivot_df = pivot_df.withColumn(col, F.lit(None).cast(DoubleType()))
 
     # ------------------------------------------------------------------
-    # 4. Deduplicate: same (cik, period_end) → prefer FY, then latest filed
+    # 4. Attach ONE representative metadata record per (cik, period_end)
+    #    The pivot above already yields exactly one row per (cik,
+    #    period_end), so NO row-dedup is needed here.  We only need to
+    #    decide which filing's metadata (company_name / fiscal_year /
+    #    fiscal_period / form_type / filed_date) labels that period.
+    #    Preference: the annual (FY) filing, then the most recently filed.
     # ------------------------------------------------------------------
     period_rank_map = F.create_map(
         *[item for pair in
@@ -449,12 +462,7 @@ def run(
           for item in pair]
     )
 
-    pivot_df = pivot_df.withColumn(
-        "_period_rank",
-        F.coalesce(period_rank_map[F.col("fiscal_period")], F.lit(9))
-    )
-
-    w_dedup = (
+    w_meta = (
         Window.partitionBy("cik", "period_end")
               .orderBy(
                   F.col("_period_rank").asc(),
@@ -463,12 +471,20 @@ def run(
               )
     )
 
-    pivot_df = (
-        pivot_df
-        .withColumn("_rn", F.row_number().over(w_dedup))
+    meta_df = (
+        df
+        .select("cik", "period_end", "company_name",
+                "fiscal_year", "fiscal_period", "form_type", "filed_date")
+        .withColumn("_period_rank",
+                    F.coalesce(period_rank_map[F.col("fiscal_period")],
+                               F.lit(9)))
+        .withColumn("_rn", F.row_number().over(w_meta))
         .filter(F.col("_rn") == 1)
         .drop("_rn", "_period_rank")
     )
+
+    # One facts row + one metadata row per (cik, period_end) → clean join
+    pivot_df = pivot_df.join(meta_df, on=["cik", "period_end"], how="left")
 
     # ------------------------------------------------------------------
     # 5. Derived fields

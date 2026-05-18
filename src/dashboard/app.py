@@ -30,6 +30,17 @@ COMPOSITE_LOCAL   = str(PROJECT_ROOT / "data" / "cache" / "composite_scores")
 UNIVERSE_PATH     = PROJECT_ROOT / "config" / "company_universe.csv"
 
 # ---------------------------------------------------------------------------
+# Model constants — keep in sync with build_gold.py and build_composite.py
+# ---------------------------------------------------------------------------
+# Altman Z'-Score zone thresholds (private-firm variant — see build_gold.py)
+Z_DISTRESS = 1.23
+Z_SAFE     = 2.90
+# Composite weights (must match W_ZSCORE / W_LLM / W_TREND in build_composite.py)
+W_Z     = 0.60
+W_LLM   = 0.20
+W_TREND = 0.20
+
+# ---------------------------------------------------------------------------
 # Page config
 # ---------------------------------------------------------------------------
 st.set_page_config(
@@ -238,12 +249,12 @@ with row1_r:
         z_data, nbins=80, color_discrete_sequence=["#3498db"],
         labels={"value": "Z-Score", "count": "Periods"},
     )
-    fig_hist.add_vline(x=1.81, line_dash="dash", line_color="#e74c3c",
-                       annotation_text="Distress (1.81)",
+    fig_hist.add_vline(x=Z_DISTRESS, line_dash="dash", line_color="#e74c3c",
+                       annotation_text=f"Distress ({Z_DISTRESS})",
                        annotation_position="top left",
                        annotation_font_color="#e74c3c")
-    fig_hist.add_vline(x=2.99, line_dash="dash", line_color="#2ecc71",
-                       annotation_text="Safe (2.99)",
+    fig_hist.add_vline(x=Z_SAFE, line_dash="dash", line_color="#2ecc71",
+                       annotation_text=f"Safe ({Z_SAFE})",
                        annotation_position="top right",
                        annotation_font_color="#2ecc71")
     fig_hist.update_layout(showlegend=False, margin=dict(t=20, b=20))
@@ -271,8 +282,8 @@ fig_time = px.line(
     },
     labels={"period_end": "Period", "altman_z_score": "Median Z-Score"},
 )
-fig_time.add_hline(y=1.81, line_dash="dot", line_color="#e74c3c", opacity=0.5)
-fig_time.add_hline(y=2.99, line_dash="dot", line_color="#2ecc71", opacity=0.5)
+fig_time.add_hline(y=Z_DISTRESS, line_dash="dot", line_color="#e74c3c", opacity=0.5)
+fig_time.add_hline(y=Z_SAFE, line_dash="dot", line_color="#2ecc71", opacity=0.5)
 fig_time.update_layout(margin=dict(t=20, b=20))
 st.plotly_chart(fig_time, use_container_width=True)
 
@@ -306,9 +317,9 @@ if selected_companies:
         labels={"period_end": "Period", "altman_z_score": "Z-Score", "company_name": "Company"},
         markers=True,
     )
-    fig_co.add_hline(y=1.81, line_dash="dot", line_color="#e74c3c", opacity=0.5,
+    fig_co.add_hline(y=Z_DISTRESS, line_dash="dot", line_color="#e74c3c", opacity=0.5,
                      annotation_text="Distress threshold")
-    fig_co.add_hline(y=2.99, line_dash="dot", line_color="#2ecc71", opacity=0.5,
+    fig_co.add_hline(y=Z_SAFE, line_dash="dot", line_color="#2ecc71", opacity=0.5,
                      annotation_text="Safe threshold")
     fig_co.update_layout(margin=dict(t=20, b=20))
     st.plotly_chart(fig_co, use_container_width=True)
@@ -453,8 +464,8 @@ else:
             symbol="going_concern",
             symbol_map={0: "circle", 1: "x"},
         )
-        fig_scatter.add_vline(x=1.81, line_dash="dot", line_color="#e74c3c", opacity=0.4)
-        fig_scatter.add_vline(x=2.99, line_dash="dot", line_color="#2ecc71", opacity=0.4)
+        fig_scatter.add_vline(x=Z_DISTRESS, line_dash="dot", line_color="#e74c3c", opacity=0.4)
+        fig_scatter.add_vline(x=Z_SAFE, line_dash="dot", line_color="#2ecc71", opacity=0.4)
         fig_scatter.add_hline(y=0,    line_dash="dot", line_color="#94a3b8",  opacity=0.4)
         fig_scatter.update_layout(margin=dict(t=10, b=10))
         st.plotly_chart(fig_scatter, use_container_width=True)
@@ -485,7 +496,10 @@ else:
 # Row 6: Composite Distress Score
 # ---------------------------------------------------------------------------
 st.divider()
-st.subheader("🎯 Composite Distress Score  (40% Z-Score + 40% LLM + 20% Trend)")
+st.subheader(
+    f"🎯 Composite Distress Score  "
+    f"({int(W_Z*100)}% Z-Score + {int(W_LLM*100)}% LLM + {int(W_TREND*100)}% Trend)"
+)
 
 if composite_df.empty:
     st.info(
@@ -517,7 +531,8 @@ else:
     ck2.metric("Mean composite score", f"{mean_comp:.3f}" if pd.notna(mean_comp) else "—")
     ck3.metric("Distress zone %",    f"{pct_comp_dist:.1f}%")
     ck4.metric("LLM-enriched rows",  f"{int(llm_used):,}")
-    ck5.metric("Weights (Z/LLM/Trend)", "40 / 40 / 20 %")
+    ck5.metric("Weights (Z/LLM/Trend)",
+               f"{int(W_Z*100)} / {int(W_LLM*100)} / {int(W_TREND*100)} %")
 
     comp_row1_l, comp_row1_r = st.columns(2)
 
@@ -592,9 +607,9 @@ else:
             },
             opacity=0.65,
         )
-        fig_comp_scatter.add_vline(x=1.81, line_dash="dot", line_color="#e74c3c", opacity=0.4,
+        fig_comp_scatter.add_vline(x=Z_DISTRESS, line_dash="dot", line_color="#e74c3c", opacity=0.4,
                                    annotation_text="Altman distress")
-        fig_comp_scatter.add_vline(x=2.99, line_dash="dot", line_color="#2ecc71", opacity=0.4,
+        fig_comp_scatter.add_vline(x=Z_SAFE, line_dash="dot", line_color="#2ecc71", opacity=0.4,
                                    annotation_text="Altman safe")
         fig_comp_scatter.add_hline(y=0.60, line_dash="dot", line_color="#e74c3c", opacity=0.4)
         fig_comp_scatter.add_hline(y=0.35, line_dash="dot", line_color="#2ecc71", opacity=0.4)
@@ -659,18 +674,18 @@ else:
                 continue
             fig_stack = go.Figure()
             fig_stack.add_trace(go.Scatter(
-                x=co_df["period_end"], y=(co_df["z_component"] * 0.40).round(4),
-                mode="lines", stackgroup="one", name="Z-Score (40%)",
+                x=co_df["period_end"], y=(co_df["z_component"] * W_Z).round(4),
+                mode="lines", stackgroup="one", name=f"Z-Score ({int(W_Z*100)}%)",
                 fillcolor="rgba(52,152,219,0.5)", line=dict(color="rgba(52,152,219,0.8)"),
             ))
             fig_stack.add_trace(go.Scatter(
-                x=co_df["period_end"], y=(co_df["llm_component"] * 0.40).round(4),
-                mode="lines", stackgroup="one", name="LLM (40%)",
+                x=co_df["period_end"], y=(co_df["llm_component"] * W_LLM).round(4),
+                mode="lines", stackgroup="one", name=f"LLM ({int(W_LLM*100)}%)",
                 fillcolor="rgba(155,89,182,0.5)", line=dict(color="rgba(155,89,182,0.8)"),
             ))
             fig_stack.add_trace(go.Scatter(
-                x=co_df["period_end"], y=(co_df["trend_component"] * 0.20).round(4),
-                mode="lines", stackgroup="one", name="Trend (20%)",
+                x=co_df["period_end"], y=(co_df["trend_component"] * W_TREND).round(4),
+                mode="lines", stackgroup="one", name=f"Trend ({int(W_TREND*100)}%)",
                 fillcolor="rgba(230,126,34,0.5)", line=dict(color="rgba(230,126,34,0.8)"),
             ))
             fig_stack.add_hline(y=0.60, line_dash="dot", line_color="#e74c3c", opacity=0.5)

@@ -1,6 +1,6 @@
 # BDT Financial Distress Early Warning System
 
-A big data pipeline that ingests SEC 10-K filings, computes Altman Z-Scores, runs LLM analysis on filing text, and visualises financial distress signals — including a **composite distress score** combining quantitative + qualitative signals — in an interactive Streamlit dashboard.
+A big data pipeline that ingests SEC 10-K filings, computes Altman Z′-Scores (private-firm variant), runs LLM analysis on filing text, and visualises financial distress signals — including a **composite distress score** combining quantitative + qualitative signals — in an interactive Streamlit dashboard.
 
 ---
 
@@ -8,7 +8,7 @@ A big data pipeline that ingests SEC 10-K filings, computes Altman Z-Scores, run
 
 ```
 SEC EDGAR ──► Bronze (MinIO) ──► Silver (Parquet) ──► Gold (DuckDB) ──► Composite ──► Dashboard
-                 raw text         keyword + LLM         Z-Scores         40/40/20      Streamlit
+                 raw text         keyword + LLM         Z′-Scores        60/20/20      Streamlit
                                     features            distress zones    score
 ```
 
@@ -16,8 +16,8 @@ SEC EDGAR ──► Bronze (MinIO) ──► Silver (Parquet) ──► Gold (Du
 |-------|----------|---------|
 | Bronze | Raw 10-K filing text — MD&A, Risk Factors, Business Description | MinIO `bronze` bucket |
 | Silver | Keyword features + LLM sentiment, risk signals, going-concern flags | MinIO `silver` + `data/cache/silver_text/` |
-| Gold | Altman Z-Score, distress zones, QoQ growth trends, BRD enrichment | MinIO `gold` + `data/cache/gold_distress/` |
-| Composite | Unified distress score: 40% Z-Score + 40% LLM + 20% Trend | `data/cache/composite_scores/` |
+| Gold | Altman Z′-Score (private-firm), distress zones, QoQ growth trends, BRD enrichment | MinIO `gold` + `data/cache/gold_distress/` |
+| Composite | Unified distress score: 60% Z′-Score + 20% LLM + 20% Trend | `data/cache/composite_scores/` |
 
 ---
 
@@ -85,10 +85,10 @@ docker compose exec app python -m src.silver.build_silver_text --skip-llm
 docker compose exec app python -m src.silver.build_silver_text \
     --model llama3.2:1b --workers 3 --limit 100
 
-# Build gold layer (Altman Z-Score, distress zones, BRD enrichment)
+# Build gold layer (Altman Z′-Score, distress zones, BRD enrichment)
 docker compose exec app python -m src.gold.build_gold
 
-# Build composite distress score (40% Z-Score + 40% LLM + 20% Trend)
+# Build composite distress score (60% Z′-Score + 20% LLM + 20% Trend)
 docker compose exec app python -m src.composite.build_composite
 ```
 
@@ -148,11 +148,12 @@ docker compose exec app python -m src.gold.build_gold
 
 ```
 bdt-distress-warning/
+├── analytics.py                    # Ad-hoc DuckDB queries: zone distribution, Z′ recall
 ├── config/
 │   └── company_universe.csv        # 736 companies: S&P 500 + LoPucki bankruptcies
 ├── data/
 │   ├── cache/                      # Auto-generated Parquet cache (gitignored)
-│   │   ├── composite_scores/       # Composite distress score (40/40/20)
+│   │   ├── composite_scores/       # Composite distress score (60/20/20)
 │   │   ├── gold_distress/          # Gold layer partitioned by distress_label
 │   │   ├── silver_financials/      # Silver financial facts
 │   │   └── silver_text/            # LLM text features (resumable)
@@ -160,15 +161,17 @@ bdt-distress-warning/
 │       └── lopucki_brd_2023.csv    # LoPucki Bankruptcy Research Database
 ├── logs/                           # Pipeline run logs
 ├── src/
+│   ├── analyze_gold.py             # Gold layer diagnostics (zone/recall analysis)
 │   ├── build_universe.py           # Build company universe (S&P 500 + LoPucki BRD)
 │   ├── ingestion/
 │   │   └── fetch_bronze_text.py    # Fetch 10-K sections from SEC EDGAR → MinIO
 │   ├── silver/
+│   │   ├── build_silver.py         # Bronze JSON → Silver Parquet (pivot fix)
 │   │   └── build_silver_text.py    # LLM pipeline: bronze text → NLP features
 │   ├── gold/
-│   │   └── build_gold.py           # Altman Z-Score + distress zones via DuckDB
+│   │   └── build_gold.py           # Altman Z′-Score + distress zones via DuckDB
 │   ├── composite/
-│   │   └── build_composite.py      # Composite score: Z-Score + LLM + Trend
+│   │   └── build_composite.py      # Composite score: Z′-Score + LLM + Trend
 │   └── dashboard/
 │       └── app.py                  # Streamlit dashboard
 ├── run_pipeline.py                 # Smart orchestrator (checks cache freshness)
@@ -216,8 +219,8 @@ The composite score combines three independent signal sources into a single unif
 
 | Component | Weight | Source | What it measures |
 |-----------|--------|--------|-----------------|
-| **Z-Score** | 40% | Gold layer | Balance sheet health (Altman Z-Score normalised to 0–1) |
-| **LLM text** | 40% | Silver text | Management tone, risk language, going-concern flags |
+| **Z′-Score** | 60% | Gold layer | Balance sheet health (Altman Z′-Score normalised to 0–1) |
+| **LLM text** | 20% | Silver text | Management tone, risk language, going-concern flags |
 | **Trend** | 20% | Gold layer | 3-quarter revenue/income decline flags + QoQ growth drops |
 
 **Score range:** 0 = no distress signal, 1 = maximum distress signal
@@ -282,17 +285,37 @@ docker compose exec app python run_pipeline.py --step composite
 |---------|-------------|
 | **Pipeline Overview** | Row counts, zone distribution, data freshness |
 | **Altman Z-Score** | Distribution, per-company timeline, distress zones |
-| **Composite Score** | Unified 40/40/20 score — zone pie, histogram, scatter vs Z-Score, per-company stacked breakdown, AfterEmerging outcomes |
+| **Composite Score** | Unified 60/20/20 score — zone pie, histogram, scatter vs Z′-Score, per-company stacked breakdown, AfterEmerging outcomes |
 | **Trend Analysis** | QoQ revenue/income growth, 3-quarter decline flags |
 | **LLM Text Analysis** | Sentiment scores by section, risk levels, going-concern signals |
 
-### Altman Z-Score Zones
+### Altman Z′-Score Zones (private-firm model)
 
-| Zone | Z-Score | Interpretation |
-|------|---------|---------------|
-| 🔴 Distress | Z < 1.81 | High bankruptcy risk |
-| 🟡 Grey | 1.81 – 2.99 | Uncertain — monitor closely |
-| 🟢 Safe | Z > 2.99 | Low bankruptcy risk |
+The gold layer uses Altman's Z′-Score (1983 private-firm variant) instead of the original 1968 Z-Score. SEC XBRL data provides **book value** of equity, not market capitalisation — the Z′ model was specifically re-estimated with book equity as X4, making it the correct choice here.
+
+**Formula:** Z′ = 0.717·X1 + 0.847·X2 + 3.107·X3 + 0.420·X4 + 0.998·X5
+
+where X4 = book equity / total liabilities (not market cap). Z′ is winsorised to [−20, 20] to absorb XBRL data artefacts.
+
+| Zone | Z′-Score | Interpretation |
+|------|----------|---------------|
+| 🔴 Distress | Z′ < 1.23 | High bankruptcy risk |
+| 🟡 Grey | 1.23 – 2.90 | Uncertain — monitor closely |
+| 🟢 Safe | Z′ > 2.90 | Low bankruptcy risk |
+
+---
+
+## Analytics Scripts
+
+Two standalone scripts are available for quick ad-hoc analysis of processed data — run them directly on your Mac (outside Docker) once the gold layer has been built.
+
+```bash
+# Zone distribution + Z′ recall on the gold cache (runs via DuckDB, no Spark needed)
+python analytics.py
+
+# Detailed gold layer diagnostics: score distributions, LoPucki recall, BRD enrichment check
+python src/analyze_gold.py
+```
 
 ---
 

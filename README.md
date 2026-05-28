@@ -219,7 +219,7 @@ The composite score combines three independent signal sources into a single unif
 
 | Component | Weight | Source | What it measures |
 |-----------|--------|--------|-----------------|
-| **Z′-Score** | 60% | Gold layer | Balance sheet health (Altman Z′-Score normalised to 0–1) |
+| **Z′-Score** | 60% | Gold layer | Z'-derived distress contribution (inverted, 0–1) |
 | **LLM text** | 20% | Silver text | Management tone, risk language, going-concern flags |
 | **Trend** | 20% | Gold layer | 3-quarter revenue/income decline flags + QoQ growth drops |
 
